@@ -3,7 +3,18 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { GoogleGenAI } from "@google/genai";
-import Stripe from 'stripe';
+import Stripe from "stripe";
+
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+if (!stripeSecretKey) {
+  throw new Error("STRIPE_SECRET_KEY is not set");
+}
+
+const stripe = new Stripe(stripeSecretKey);
+
+
+
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -12,7 +23,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 // Initialize Stripe and Gemini
-const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
+
 // Always use the process.env.API_KEY string directly
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
