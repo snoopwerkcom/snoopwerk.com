@@ -2,7 +2,7 @@
 export enum ToolType {
   LANDING = 'LANDING',
   AB_TESTING = 'AB_TESTING',
-  POD_MERCH = 'POD_MERCH',
+   POD_MERCH = 'pod-merch', 
   REMOVE_BG = 'REMOVE_BG',
   UPSCALE = 'UPSCALE',
   TEXT_EDIT = 'TEXT_EDIT',
@@ -10,6 +10,7 @@ export enum ToolType {
   MAGIC_EDIT = 'MAGIC_EDIT',
   LOGO_DESIGNER = 'LOGO_DESIGNER',
   PRICING = 'PRICING'
+  CAROUSEL = 'carousel'
 }
 
 export type WorkstationStage = 'IDLE' | 'GENERATING' | 'EDITING' | 'REFINING' | 'COMPARE';
@@ -155,12 +156,13 @@ export const DEFAULT_TEXT_SETTINGS: TextSettings = {
 
 export interface PricingPlan {
   name: string;
+  description: string;
   price: string;
   credits: string;
-  description: string;
   features: string[];
   buttonText: string;
   popular?: boolean;
+  stripePriceId?: string; // Add this for Stripe integration later
 }
 
 export const PRICING_PLANS: PricingPlan[] = [
@@ -169,7 +171,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     price: "$0",
     credits: "10 credits free",
     description: "New users, casual creators",
-    features: ["Standard image generation", "Basic background removal", "HD upscaling", "Try without credit card"],
+    features: ["Standard image generation", "Basic background removal"],
     buttonText: "Start Free Trial"
   },
   {
@@ -177,7 +179,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     price: "$15",
     credits: "50 credits / month",
     description: "Starter creators, hobbyists",
-    features: ["Standard asset generation", "Cloud storage", "Essential editing tools", "Priority support"],
+    features: ["Standard asset generation", "Cloud storage", "Essential tools"],
     buttonText: "Choose Basic"
   },
   {
@@ -185,7 +187,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     price: "$25",
     credits: "180 credits / month",
     description: "Frequent creator, influencer",
-    features: ["4K asset generation", "Unlimited Magic Edits", "Brand Kit support", "No watermarks"],
+    features: ["4K asset generation", "Unlimited Magic Edits", "Brand watermark"],
     buttonText: "Go Pro",
     popular: true
   },
@@ -194,7 +196,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     price: "$59",
     credits: "500 credits / month",
     description: "Agencies, studio, team",
-    features: ["Full Studio access", "Batch processing", "API access", "Priority support"],
+    features: ["Full studio access", "Batch processing", "API access"],
     buttonText: "CHOOSE AGENCY"
   }
 ];
