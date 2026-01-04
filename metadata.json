@@ -1,0 +1,7 @@
+{
+  "name": "SnoopWerk",
+  "description": "A high-performance creative SaaS tool for A/B testing image generation, Instagram carousels, POD merch design, and advanced AI image editing.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
