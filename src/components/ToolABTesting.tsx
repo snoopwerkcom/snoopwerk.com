@@ -1,15 +1,36 @@
 import React, { useState } from 'react';
-import { generateImage, editAIImage, removeBackground, upscaleImage } from '../services/api';
-import { ToolType, AppToolsState, STYLES, VariantEdit, DEFAULT_VARIANT_EDIT, GenerationStyle, UserCredits } from '../types';
 
+import {
+  generateAIImage,
+  editAIImage,
+  removeBackground,
+  upscaleImage,
+} from '../services/api';
+
+import {
+  ToolType,
+  AppToolsState,
+  STYLES,
+  VariantEdit,
+  DEFAULT_VARIANT_EDIT,
+  GenerationStyle,
+  UserCredits,
+} from '../types/index';
+
+import ImageModal from './ImageModal';
+
+interface ToolABTestingState {
+  prompt: string;
+  style: GenerationStyle;
+  images: string[];
+}
 interface ToolABTestingProps {
-  state: AppToolsState['abTesting'];
+  state: ToolABTestingState;
   credits: UserCredits;
-  onUpdate: (newState: Partial<AppToolsState['abTesting']>) => void;
+  onUpdate: (newState: Partial<ToolABTestingState>) => void;
   onUpdateCredits: (credits: UserCredits) => void;
   onAction: (tool: ToolType, image?: string) => void;
 }
-
 const ToolABTesting: React.FC<ToolABTestingProps> = ({ state, credits, onUpdate, onUpdateCredits, onAction }) => {
   const [compareMode, setCompareMode] = useState(true);
   const [activeTab, setActiveTab] = useState<'text' | 'enhance' | 'magic'>('text');

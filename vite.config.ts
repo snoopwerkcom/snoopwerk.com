@@ -18,6 +18,9 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, './src'),
         }
+      },
+      esbuild: {
+        logOverride: { 'this-is-undefined-in-esm': 'silent' }
       }
     };
 });
