@@ -24,26 +24,36 @@ export type GenerationStyle =
   | string;
 
 /* ---------- Variant editing ---------- */
-export type VariantEdit = {
-  prompt?: string;
-  style?: GenerationStyle;
-};
+export interface VariantEdit {
+  overlayText: string;
+  magicPrompt: string;      // Added
+  textSize: number;
+  textColor: string;
+  fontFamily: string;
+  textX: number;
+  textY: number;
+  textRotation: number;    // Added
+}
 
 export const DEFAULT_VARIANT_EDIT: VariantEdit = {
-  prompt: '',
-  style: 'realistic',
+  overlayText: '',
+  magicPrompt: '',         // Added
+  textSize: 60,
+  textColor: '#ffffff',
+  fontFamily: 'sans-serif',
+  textX: 50,
+  textY: 50,
+  textRotation: 0,         // Added
 };
 
-/* ---------- Styles ---------- */
+// Ensure your STYLES objects look like this:
 export const STYLES = [
-  'realistic',
-  'anime',
-  'illustration',
-  'photographic',
-  'cinematic',
-  'flat',
-  '3d',
-] as const;
+  { id: 'minimalist', label: 'Minimalist', emoji: '🎨', promptSuffix: 'clean minimalist style' },
+  { id: 'cinematic', label: 'Cinematic', emoji: '🎬', promptSuffix: 'high cinematic detail' },
+  // ... add the rest of your styles here
+];
+
+/* ---------- Styles ---------- */
 
 /* ---------- App state ---------- */
 export type AppToolsState = {
