@@ -306,8 +306,7 @@ const ToolCarousel: React.FC<ToolCarouselProps> = ({ state, credits, onUpdate, o
                 <label className="text-[9px] font-black uppercase tracking-widest text-slate-500">Visual Style</label>
                 <select value={state.style} onChange={(e) => onUpdate({ style: e.target.value as any })} className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-xs font-black text-white outline-none focus:ring-2 focus:ring-indigo-500 appearance-none cursor-pointer">
                   {CAROUSEL_SPECIFIC_STYLES.map((style) => (
-                    <option key={style.id} value={style.id}>{style.emoji} {style.label.toUpperCase()}</option>
-                  ))}
+                    <option key={style.id} value={style.id}>{style.emoji} {style?.label?.toUpperCase() || ''}</option>
                 </select>
               </div>
               <div className="space-y-5">

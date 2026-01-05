@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import {
-  generateAIImage,
+  generateAIImage as generateImage,
   editAIImage,
   removeBackground,
   upscaleImage,
@@ -212,7 +212,7 @@ const ToolABTesting: React.FC<ToolABTestingProps> = ({ state, credits, onUpdate,
                 >
                   {STYLES.map((style) => (
                     <option key={style.id} value={style.id} className="bg-slate-900">
-                      {style.emoji} {style.label.toUpperCase()}
+                     {style?.emoji} {style?.label?.toUpperCase() || ''}
                     </option>
                   ))}
                 </select>
