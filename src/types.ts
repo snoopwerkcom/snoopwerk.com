@@ -1,16 +1,16 @@
 
 export enum ToolType {
-  LANDING = 'LANDING',
-  AB_TESTING = 'AB_TESTING',
-   POD_MERCH = 'pod-merch', 
-  REMOVE_BG = 'REMOVE_BG',
-  UPSCALE = 'UPSCALE',
-  TEXT_EDIT = 'TEXT_EDIT',
-  THUMBNAILS = 'THUMBNAILS',
-  MAGIC_EDIT = 'MAGIC_EDIT',
-  LOGO_DESIGNER = 'LOGO_DESIGNER',
-  PRICING = 'PRICING'
-  CAROUSEL = 'carousel'
+  LANDING = 'landing',
+  PRICING = 'pricing',
+  THUMBNAILS = 'thumbnails',
+  AB_TESTING = 'ab-testing',
+  POD_MERCH = 'pod-merch',
+  LOGO_DESIGNER = 'logo-designer',  // ← Make sure there's a comma here
+  REMOVE_BG = 'remove-bg',
+  UPSCALE = 'upscale',
+  TEXT_EDIT = 'text-edit',
+  MAGIC = 'magic',
+  CAROUSEL = 'carousel'  // ← Last one doesn't need comma but it's fine to have it
 }
 
 export type WorkstationStage = 'IDLE' | 'GENERATING' | 'EDITING' | 'REFINING' | 'COMPARE';
