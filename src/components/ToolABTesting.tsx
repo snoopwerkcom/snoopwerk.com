@@ -349,7 +349,6 @@ const ToolABTesting: React.FC<ToolABTestingProps> = ({ state, credits, onUpdate,
               <div className="relative flex-1 bg-[#0a0a0a] rounded-[56px] border border-white/10 shadow-[0_48px_96px_-12px_rgba(0,0,0,0.8)] overflow-hidden flex items-center justify-center">
                 <img src={v} className="w-full h-full object-contain" alt={`Final Variation ${i}`} />
                 {renderTextOverlay(state.variantEdits[i])}
-                <div className="absolute top-8 left-8 bg-black/80 px-4 py-2 rounded-2xl text-[10px] font-[1000] text-red-500 border border-red-500/20 uppercase tracking-widest backdrop-blur-xl">Variation_0{i+1}</div>
               </div>
               <button 
                 onClick={() => {
@@ -479,6 +478,12 @@ const ToolABTesting: React.FC<ToolABTestingProps> = ({ state, credits, onUpdate,
                 </div>
                 <input type="range" min="10" max="250" value={currentEdit.textSize} onChange={(e) => updateCurrentEdit({ textSize: parseInt(e.target.value) })} className="w-full h-1 bg-white/10 rounded-full accent-red-600 cursor-pointer appearance-none" />
                 
+                <div className="flex justify-between items-center px-1">
+                  <label className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-500">Rotation</label>
+                  <span className="text-red-500 text-[10px] font-black">{currentEdit.textRotation}°</span>
+                </div>
+                <input type="range" min="-180" max="180" value={currentEdit.textRotation} onChange={(e) => updateCurrentEdit({ textRotation: parseInt(e.target.value) })} className="w-full h-1 bg-white/10 rounded-full accent-red-600 cursor-pointer appearance-none" />
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-3">
                      <label className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-500 ml-1">X-Anchor</label>
@@ -494,7 +499,7 @@ const ToolABTesting: React.FC<ToolABTestingProps> = ({ state, credits, onUpdate,
           )}
           {activeTab === 'enhance' && (
             <div className="space-y-3 animate-in slide-in-from-right duration-400">
-              <button onClick={handleRemoveBg} className="w-full py-4 bg-teal-600 text-white font-black rounded-xl text-[9px] uppercase tracking-widest hover:bg-teal-700 transition-all active:scale-95">Subject Extraction</button>
+              <button onClick={handleRemoveBg} className="w-full py-4 bg-teal-600 text-white font-black rounded-xl text-[9px] uppercase tracking-widest hover:bg-teal-700 transition-all active:scale-95">Remove BG</button>
               <button onClick={handleUpscaleAction} className="w-full py-4 bg-red-600 text-white font-black rounded-xl text-[9px] uppercase tracking-widest hover:bg-red-700 transition-all active:scale-95">4K Synthesis</button>
             </div>
           )}
