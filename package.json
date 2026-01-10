@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@stripe/stripe-js": "^8.6.1",
     "@supabase/supabase-js": "^2.89.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

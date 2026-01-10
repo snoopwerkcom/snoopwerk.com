@@ -1,8 +1,7 @@
-
 export enum ToolType {
   LANDING = 'LANDING',
   AB_TESTING = 'AB_TESTING',
-   POD_MERCH = 'pod-merch', 
+  POD_MERCH = 'POD_MERCH',
   REMOVE_BG = 'REMOVE_BG',
   UPSCALE = 'UPSCALE',
   TEXT_EDIT = 'TEXT_EDIT',
@@ -10,16 +9,16 @@ export enum ToolType {
   MAGIC_EDIT = 'MAGIC_EDIT',
   LOGO_DESIGNER = 'LOGO_DESIGNER',
   PRICING = 'PRICING'
-  CAROUSEL = 'carousel'
 }
 
 export type WorkstationStage = 'IDLE' | 'GENERATING' | 'EDITING' | 'REFINING' | 'COMPARE';
 
 export type GenerationStyle = 
-  | 'none' | 'anime' | 'black_and_white' | 'cartoon' | 'cinematic' | 'comic' | 'cyberpunk' 
-  | 'kawai' | 'loonytoon' | 'manga' | 'calligraphy' | 'new_wave' | 'oil_painting' 
-  | 'photography' | 'pixar' | 'psychedelic' | 'realistic' | 'retro'
-  | 'minimalist' | 'bold' | 'vibrant' | 'dark' | 'photo_led';
+  | 'bold_typography' | 'brutalist' | 'carousel_storytelling' | 'illustration_cartoon' | 'minimalist'
+  | 'realism' | 'cyberpunk' | 'cartoon' | 'cinematic' | 'manga'
+  | 'none' | 'anime' | 'calligraphy' | 'looney_toon' | 'oil_painting' | 'photography' | 'psychedelic' | 'retro' | 'wave'
+  | 'anime_cartoon' | 'gamer' | 'looneytoon' | 'newwave' | 'oilpainting' | 'photo_real' | 'psydelic' | 'pixar' | 'svg'
+  | 'black_and_white';
 
 export interface StyleOption {
   id: GenerationStyle;
@@ -29,29 +28,36 @@ export interface StyleOption {
 }
 
 export const STYLES: StyleOption[] = [
-  { id: 'none', label: 'None', emoji: '✨', promptSuffix: '' },
-  { id: 'minimalist', label: 'Clean Minimalist', emoji: '☁️', promptSuffix: 'clean minimalist aesthetic, high-end professional design, ample white space, elegant' },
-  { id: 'bold', label: 'Bold Attention-Grabber', emoji: '🔥', promptSuffix: 'bold high-contrast design, attention-grabbing colors, punchy typography style, energetic' },
-  { id: 'vibrant', label: 'Vibrant Creator', emoji: '🌈', promptSuffix: 'vibrant colors, modern creator aesthetic, high saturation, playful and professional' },
-  { id: 'dark', label: 'Dark Aesthetic', emoji: '🌑', promptSuffix: 'dark sleek aesthetic, moody lighting, sophisticated shadows, premium look' },
-  { id: 'photo_led', label: 'photo-led', emoji: '📸', promptSuffix: 'photorealistic style, high-quality photography focus, authentic imagery, clear, sharp' },
-  { id: 'anime', label: 'Anime', emoji: '⛩️', promptSuffix: 'high-quality anime illustration, cel-shaded, vibrant colors' },
-  { id: 'black_and_white', label: 'Black and White', emoji: '🏁', promptSuffix: 'monochrome, high-contrast black and white photography, artistic grayscale' },
-  { id: 'cartoon', label: 'Cartoon', emoji: '🎨', promptSuffix: 'modern cartoon style, clean vector lines, bold vibrant colors' },
-  { id: 'cinematic', label: 'Cinematic', emoji: '🎬', promptSuffix: 'cinematic lighting, dramatic atmosphere, blockbuster movie aesthetic, 8k resolution' },
-  { id: 'comic', label: 'Comic', emoji: '💥', promptSuffix: 'comic book style, ink lines, halftone patterns, dynamic action' },
-  { id: 'cyberpunk', label: 'Cyberpunk', emoji: '🌃', promptSuffix: 'cyberpunk aesthetic, neon lights, futuristic cityscape, high-tech' },
-  { id: 'kawai', label: 'Kawai', emoji: '🎀', promptSuffix: 'kawaii style, extremely cute, soft pastel colors, bubbly shapes' },
-  { id: 'loonytoon', label: 'Loonytoon', emoji: '🐰', promptSuffix: 'classic looney tunes animation style, vintage cartoon aesthetic' },
-  { id: 'manga', label: 'Manga', emoji: '📖', promptSuffix: 'classic manga style, detailed black ink lines, screen tones, high contrast' },
-  { id: 'calligraphy', label: 'Calligraphy', emoji: '🖌️', promptSuffix: 'elegant hand-drawn calligraphy, artistic ink brush strokes, sophisticated' },
-  { id: 'new_wave', label: 'New Wave', emoji: '🌊', promptSuffix: 'new wave 80s aesthetic, synthwave neon, retro-futurism' },
-  { id: 'oil_painting', label: 'Oil Painting', emoji: '🖼️', promptSuffix: 'rich oil painting, visible thick brushstrokes, classical fine art texture' },
-  { id: 'photography', label: 'Photography', emoji: '📸', promptSuffix: 'photorealistic, high-end professional photography, sharp focus, DSLR' },
-  { id: 'pixar', label: 'Pixar', emoji: '🎈', promptSuffix: '3D animation style, Pixar inspired, soft lighting, cute characters' },
-  { id: 'psychedelic', label: 'Psychedelic', emoji: '🌀', promptSuffix: 'psychedelic art, trippy visuals, swirling kaleidoscopic colors' },
-  { id: 'realistic', label: 'Realistic', emoji: '💎', promptSuffix: 'highly realistic, detailed textures, natural lifelike lighting' },
-  { id: 'retro', label: 'Retro', emoji: '📻', promptSuffix: 'retro vintage style, faded film look, 70s 80s aesthetic grain' },
+  { 
+    id: 'bold_typography', 
+    label: 'Bold Typography', 
+    emoji: '🅰️', 
+    promptSuffix: 'bold high-impact typography, massive fonts, high contrast, professional graphic design, Swiss style, clean but loud' 
+  },
+  { 
+    id: 'brutalist', 
+    label: 'Brutalist', 
+    emoji: '🧱', 
+    promptSuffix: 'brutalist aesthetic, raw unpolished design, chunky borders, high contrast, neo-brutalism, industrial vibe, rule-breaking layout' 
+  },
+  { 
+    id: 'carousel_storytelling', 
+    label: 'Carousel Storytelling', 
+    emoji: '📖', 
+    promptSuffix: 'narrative visual storytelling, continuous flow between frames, cinematic storyboard, consistent characters, sequence-driven visuals' 
+  },
+  { 
+    id: 'illustration_cartoon', 
+    label: 'Illustration / Cartoon Style', 
+    emoji: '🎨', 
+    promptSuffix: 'modern flat vector illustration, clean lines, playful colors, stylized cartoon characters, trendy digital art' 
+  },
+  { 
+    id: 'minimalist', 
+    label: 'Minimalist', 
+    emoji: '☁️', 
+    promptSuffix: 'clean minimalist aesthetic, high-end professional design, ample white space, elegant, simple composition, sophisticated' 
+  },
 ];
 
 export interface VariantEdit {
@@ -121,8 +127,8 @@ export interface AppToolsState {
     style: GenerationStyle;
     slides: CarouselSlide[];
     activeIndex: number;
-    view: 'HOME' | 'SETUP' | 'ANALYSIS' | 'EDITOR' | 'EXPORT';
-    aspectRatio: '1:1' | '16:9' | '9:16';
+    view: 'LANDING' | 'HOME' | 'SETUP' | 'ANALYSIS' | 'EDITOR' | 'EXPORT';
+    aspectRatio: '1:1' | '16:9' | '9:16' | '4:3' | '3:4';
     isLoading: boolean;
     numSlides: number;
     summary: string;
@@ -156,47 +162,46 @@ export const DEFAULT_TEXT_SETTINGS: TextSettings = {
 
 export interface PricingPlan {
   name: string;
-  description: string;
   price: string;
   credits: string;
+  description: string;
   features: string[];
   buttonText: string;
   popular?: boolean;
-  stripePriceId?: string; // Add this for Stripe integration later
 }
 
 export const PRICING_PLANS: PricingPlan[] = [
   {
-    name: "Free Trial",
+    name: "FREE",
     price: "$0",
-    credits: "10 credits free",
-    description: "New users, casual creators",
-    features: ["Standard image generation", "Basic background removal"],
-    buttonText: "Start Free Trial"
+    credits: "",
+    description: "",
+    features: ["10 credits", "Image Generation", "Magic Edit", "No watermark"],
+    buttonText: "Get Started"
   },
   {
-    name: "Basic",
+    name: "BASIC",
     price: "$15",
-    credits: "50 credits / month",
-    description: "Starter creators, hobbyists",
-    features: ["Standard asset generation", "Cloud storage", "Essential tools"],
-    buttonText: "Choose Basic"
+    credits: "/month",
+    description: "",
+    features: ["60 credits / month", "Image generation", "Magic edit", "Background removal"],
+    buttonText: "Choose"
   },
   {
-    name: "Pro",
+    name: "PRO",
     price: "$25",
-    credits: "180 credits / month",
-    description: "Frequent creator, influencer",
-    features: ["4K asset generation", "Unlimited Magic Edits", "Brand watermark"],
-    buttonText: "Go Pro",
+    credits: "/month",
+    description: "",
+    features: ["180 credits / month", "Everything in BASIC", "Faster rendering", "Higher resolution"],
+    buttonText: "Choose",
     popular: true
   },
   {
-    name: "Agency",
+    name: "AGENCY",
     price: "$59",
-    credits: "500 credits / month",
-    description: "Agencies, studio, team",
-    features: ["Full studio access", "Batch processing", "API access"],
-    buttonText: "CHOOSE AGENCY"
+    credits: "/month",
+    description: "",
+    features: ["500 credits / month", "Everything in PRO", "Team access", "Client export tools"],
+    buttonText: "Choose"
   }
 ];

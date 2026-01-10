@@ -16,32 +16,52 @@ const callGeminiGen = async <T = any>(payload: any): Promise<T> => {
 };
 
 // Main image generation function
-export const generateAIImage = async (prompt: string, style?: string) =>
-  (await callGeminiGen<{ imageUrl: string }>({
+export const generateAIImage = async (prompt: string, style?: string) => {
+  const result = await callGeminiGen<{ imageUrl: string; credits?: any }>({
     action: 'generate',
     prompt,
     style,
-  })).imageUrl;
+  });
+  return {
+    imageUrl: result.imageUrl,
+    credits: result.credits
+  };
+};
 
 // Canonical API
-export const editAIImage = async (image: string, prompt: string) =>
-  (await callGeminiGen<{ imageUrl: string }>({
+export const editAIImage = async (image: string, prompt: string) => {
+  const result = await callGeminiGen<{ imageUrl: string; credits?: any }>({
     action: 'edit',
     prompt,
     imageBase64: cleanBase64(image),
-  })).imageUrl;
+  });
+  return {
+    imageUrl: result.imageUrl,
+    credits: result.credits
+  };
+};
 
-export const removeBackground = async (image: string) =>
-  (await callGeminiGen<{ imageUrl: string }>({
+export const removeBackground = async (image: string) => {
+  const result = await callGeminiGen<{ imageUrl: string; credits?: any }>({
     action: 'remove-bg',
     imageBase64: cleanBase64(image),
-  })).imageUrl;
+  });
+  return {
+    imageUrl: result.imageUrl,
+    credits: result.credits
+  };
+};
 
-export const upscaleImage = async (image: string) =>
-  (await callGeminiGen<{ imageUrl: string }>({
+export const upscaleImage = async (image: string) => {
+  const result = await callGeminiGen<{ imageUrl: string; credits?: any }>({
     action: 'upscale',
     imageBase64: cleanBase64(image),
-  })).imageUrl;
+  });
+  return {
+    imageUrl: result.imageUrl,
+    credits: result.credits
+  };
+};
 
 // Legacy alias
 export const generateImage = generateAIImage;
@@ -51,33 +71,72 @@ export const generateImage = generateAIImage;
 // ===============================
 
 // Text-only generation (Gemini text)
-export const generateTextContent = async (prompt: string) => {
+export const generateTextContent = async (prompt: string, instruction?: string) => {
   const { data, error } = await supabase.functions.invoke('gemini-gen', {
     body: {
       action: 'text',
-      prompt,
+      prompt: instruction || prompt,
+      context: instruction ? prompt : undefined,
     },
   });
   if (error) throw error;
-  return data.text;
+  return {
+    text: data.text,
+    credits: data.credits
+  };
 };
 
 // Multimodal analysis (text + image / video URL)
-export const analyzeMultimodalContent = async (payload: {
-  prompt: string;
-  imageBase64?: string;
-  imageUrl?: string;
-  videoUrl?: string;
-}) => {
+// Supports both carousel usage: (type, value, instruction) and direct object usage: ({ prompt, ... })
+export const analyzeMultimodalContent = async (
+  sourceTypeOrPayload: 'prompt' | 'url' | 'image' | 'video' | { prompt: string; imageBase64?: string; imageUrl?: string; videoUrl?: string },
+  sourceValue?: string,
+  systemInstruction?: string
+) => {
+  let payload: any;
+  
+  // Handle carousel's 3-argument call: (type, value, instruction)
+  if (typeof sourceTypeOrPayload === 'string' && sourceValue !== undefined) {
+    payload = {
+      prompt: systemInstruction || 'analyze this content and provide a detailed summary.',
+    };
+    
+    // Map source type to correct field
+    if (sourceTypeOrPayload === 'url') {
+      payload.imageUrl = sourceValue;
+    } else if (sourceTypeOrPayload === 'image') {
+      payload.imageBase64 = cleanBase64(sourceValue);
+    } else if (sourceTypeOrPayload === 'video') {
+      payload.videoUrl = sourceValue;
+    } else if (sourceTypeOrPayload === 'prompt') {
+      // For prompt type, the sourceValue IS the content to analyze
+      payload.prompt = systemInstruction || 'analyze this content.';
+      payload.context = sourceValue; // The actual content to analyze
+    }
+  } 
+  // Handle direct object call: ({ prompt, imageBase64, ... })
+  else if (typeof sourceTypeOrPayload === 'object') {
+    payload = {
+      ...sourceTypeOrPayload,
+      imageBase64: sourceTypeOrPayload.imageBase64
+        ? cleanBase64(sourceTypeOrPayload.imageBase64)
+        : undefined,
+    };
+  } else {
+    throw new Error('Invalid analyzeMultimodalContent arguments');
+  }
+
   const { data, error } = await supabase.functions.invoke('gemini-gen', {
     body: {
-      action: 'analyze',
+      action: 'text',
       ...payload,
-      imageBase64: payload.imageBase64
-        ? cleanBase64(payload.imageBase64)
-        : undefined,
     },
   });
+  
   if (error) throw error;
-  return data;
+  
+  return {
+    summary: data.summary || data.text || 
+    'credits', data:'credit'
+  };
 };
