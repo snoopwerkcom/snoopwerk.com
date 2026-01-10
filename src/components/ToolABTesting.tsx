@@ -27,6 +27,15 @@ const AB_STYLES: StyleOption[] = [
   { id: 'retro', label: 'Retro', emoji: '📼', promptSuffix: 'vintage 80s aesthetic, vhs grain' },
 ];
 
+const FONTS = [
+  { label: 'System Sans', value: 'sans-serif' },
+  { label: 'Bebas Neue', value: "'Bebas Neue', sans-serif" },
+  { label: 'Impact', value: 'Impact, sans-serif' },
+  { label: 'Inter Black', value: "'Inter', sans-serif" },
+  { label: 'Oswald', value: "'Oswald', sans-serif" },
+  { label: 'Montserrat', value: "'Montserrat', sans-serif" },
+];
+
 const ToolABTesting: React.FC<ToolABTestingProps> = ({ state, credits, onUpdate, onUpdateCredits, onAction }) => {
   const [compareMode, setCompareMode] = useState(true);
   const [activeTab, setActiveTab] = useState<'text' | 'enhance' | 'magic'>('text');
@@ -161,7 +170,6 @@ const ToolABTesting: React.FC<ToolABTestingProps> = ({ state, credits, onUpdate,
         {/* Scattered UHD YouTube Thumbnail Realism Images */}
         <div className="absolute inset-0 z-0 group/bg overflow-hidden">
           <div className="absolute inset-0 scale-100 transition-transform duration-[60s] group-hover/bg:scale-105">
-             {/* UHD Photography Collection */}
              <div 
                className="absolute top-[8%] left-[-2%] w-[35%] aspect-video rounded-[48px] border-4 border-white/10 shadow-[0_60px_100px_rgba(0,0,0,0.8)] bg-cover bg-center rotate-[-3deg] opacity-90 animate-in fade-in slide-in-from-left-12 duration-1000" 
                style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1492724441997-5dc865305da7?q=100&w=3840")' }} 
@@ -233,12 +241,10 @@ const ToolABTesting: React.FC<ToolABTestingProps> = ({ state, credits, onUpdate,
     const isGenerating = state.stage === 'GENERATING';
     return (
       <div className="relative h-screen flex flex-col items-center justify-center p-6 bg-[#0a0a0a] overflow-hidden font-inter">
-        {/* Photoreal Cafe Scene background - UPDATED TO 100% OPACITY */}
         <div 
           className="absolute inset-0 z-0 bg-cover bg-center opacity-100 transition-opacity duration-1000 saturate-[1.1]"
           style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=100&w=3840")' }}
         />
-        {/* Adjusted Radial Gradient to be less aggressive to let the 100% opacity image shine */}
         <div className="absolute inset-0 z-[1] bg-[radial-gradient(circle_at_center,_transparent_0%,_#0a0a0a_100%)] opacity-70" />
         
         <div className="relative z-10 w-full max-w-xl flex flex-col items-center gap-4 animate-in fade-in zoom-in duration-700">
@@ -320,6 +326,50 @@ const ToolABTesting: React.FC<ToolABTestingProps> = ({ state, credits, onUpdate,
     );
   }
 
+  // Final Compare View Workstation
+  if (state.stage === 'COMPARE') {
+    return (
+      <div className="h-screen flex flex-col bg-[#020202] font-inter overflow-hidden">
+        <header className="h-20 bg-black/60 border-b border-white/10 flex items-center justify-between px-8 backdrop-blur-3xl shrink-0 z-30">
+          <div className="flex items-center gap-4">
+            <h1 className="text-xl font-[1000] text-white tracking-tighter uppercase leading-none">A/B FINAL PREVIEW</h1>
+            <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.4em]">Review & Export Stage</p>
+          </div>
+          <button 
+            onClick={() => onUpdate({ stage: 'EDITING' })}
+            className="px-8 py-3 bg-white/5 border border-white/10 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-white/10 transition-all active:scale-95"
+          >
+            Back to Laboratory
+          </button>
+        </header>
+
+        <div className="flex-1 flex gap-8 p-10 overflow-hidden min-h-0 items-center justify-center">
+          {state.variations.map((v, i) => (
+            <div key={i} className="flex-1 h-full flex flex-col gap-6 animate-in slide-in-from-bottom-8 duration-700" style={{ animationDelay: `${i * 200}ms` }}>
+              <div className="relative flex-1 bg-[#0a0a0a] rounded-[56px] border border-white/10 shadow-[0_48px_96px_-12px_rgba(0,0,0,0.8)] overflow-hidden flex items-center justify-center">
+                <img src={v} className="w-full h-full object-contain" alt={`Final Variation ${i}`} />
+                {renderTextOverlay(state.variantEdits[i])}
+                <div className="absolute top-8 left-8 bg-black/80 px-4 py-2 rounded-2xl text-[10px] font-[1000] text-red-500 border border-red-500/20 uppercase tracking-widest backdrop-blur-xl">Variation_0{i+1}</div>
+              </div>
+              <button 
+                onClick={() => {
+                  const link = document.createElement('a');
+                  link.href = v;
+                  link.download = `snoopwerk-variation-${i+1}.png`;
+                  link.click();
+                }}
+                className="w-full py-6 bg-red-600 hover:bg-red-500 text-white font-black rounded-3xl text-[11px] uppercase tracking-[0.4em] shadow-2xl transition-all active:scale-95"
+              >
+                Export Asset_0{i+1}
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Main Editor View
   return (
     <div className="h-screen flex bg-[#050505] overflow-hidden font-inter">
       <div className="flex-1 flex flex-col p-4 overflow-hidden relative min-h-0">
@@ -344,7 +394,7 @@ const ToolABTesting: React.FC<ToolABTestingProps> = ({ state, credits, onUpdate,
               onClick={() => onUpdate({ stage: 'COMPARE' })}
               className="px-6 py-2 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] bg-red-600 text-white hover:bg-red-500 shadow-2xl active:scale-95"
             >
-              EXPORT
+              PREVIEW FINAL
             </button>
           </div>
         </header>
@@ -387,7 +437,7 @@ const ToolABTesting: React.FC<ToolABTestingProps> = ({ state, credits, onUpdate,
             </button>
           ))}
         </div>
-        <div className="p-6 flex-1 overflow-y-auto custom-scrollbar space-y-8 bg-gradient-to-b from-[#080808] to-black">
+        <div className="p-6 flex-1 overflow-y-auto custom-scrollbar space-y-8 bg-gradient-to-b from-[#080808] to-black pb-24">
           {activeTab === 'text' && (
             <div className="space-y-6 animate-in slide-in-from-right duration-400">
               <div className="space-y-3">
@@ -399,6 +449,29 @@ const ToolABTesting: React.FC<ToolABTestingProps> = ({ state, credits, onUpdate,
                   placeholder="EX: I SURVIVED..."
                 />
               </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-500 ml-1">Text Color</label>
+                  <input 
+                    type="color" 
+                    value={currentEdit.textColor} 
+                    onChange={(e) => updateCurrentEdit({ textColor: e.target.value })}
+                    className="w-full h-10 bg-transparent cursor-pointer rounded-xl border border-white/10"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-500 ml-1">Typeface</label>
+                  <select 
+                    value={currentEdit.fontFamily}
+                    onChange={(e) => updateCurrentEdit({ fontFamily: e.target.value })}
+                    className="w-full h-10 bg-[#121212] border border-white/10 rounded-xl p-2 text-[10px] text-white font-black"
+                  >
+                    {FONTS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
+                  </select>
+                </div>
+              </div>
+
               <div className="space-y-6">
                 <div className="flex justify-between items-center px-1">
                   <label className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-500">Scale</label>
@@ -440,7 +513,7 @@ const ToolABTesting: React.FC<ToolABTestingProps> = ({ state, credits, onUpdate,
             </div>
           )}
         </div>
-        <div className="p-6 border-t border-white/5 bg-[#080808] shrink-0">
+        <div className="p-6 border-t border-white/5 bg-[#080808] shrink-0 sticky bottom-0">
           <button onClick={resetWorkstation} className="w-full py-3 text-slate-600 hover:text-red-500 text-[9px] font-black uppercase tracking-[0.2em] transition-colors border border-white/5 rounded-xl">Terminate Session</button>
         </div>
       </aside>
