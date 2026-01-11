@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ToolType, PRICING_PLANS } from '../types';
 
 interface LandingPageProps {
@@ -8,6 +8,16 @@ interface LandingPageProps {
 
 const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 20;
+      if (isScrolled !== scrolled) setScrolled(isScrolled);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [scrolled]);
 
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
@@ -16,37 +26,49 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
 
   return (
     <div className="relative min-h-screen bg-[#020617] text-slate-200 selection:bg-indigo-500/30 overflow-x-hidden font-inter">
-      {/* Immersive Background Canvas */}
+      {/* Dynamic Background */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-15%] left-[-5%] w-[50%] h-[50%] bg-indigo-600/15 rounded-full blur-[140px] animate-pulse" />
-        <div className="absolute bottom-[5%] right-[-10%] w-[45%] h-[45%] bg-teal-500/10 rounded-full blur-[140px]" />
-        <div className="absolute top-[30%] left-[40%] w-[35%] h-[35%] bg-purple-600/10 rounded-full blur-[140px] opacity-60" />
-        <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-        {/* Animated Orbs */}
-        <div className="absolute top-[20%] right-[20%] w-2 h-2 bg-indigo-400 rounded-full animate-ping" />
-        <div className="absolute bottom-[30%] left-[15%] w-1.5 h-1.5 bg-teal-400 rounded-full animate-ping [animation-delay:1s]" />
+        <div className="absolute top-[-15%] left-[-5%] w-[60%] h-[60%] bg-indigo-600/20 rounded-full blur-[160px] animate-glow" />
+        <div className="absolute bottom-[5%] right-[-10%] w-[50%] h-[50%] bg-teal-500/10 rounded-full blur-[160px] animate-glow [animation-delay:4s]" />
+        <div className="absolute top-[30%] left-[40%] w-[40%] h-[40%] bg-purple-600/10 rounded-full blur-[160px] opacity-60 animate-glow [animation-delay:2s]" />
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
       </div>
 
-      {/* Modern Navigation */}
-      <nav className="fixed top-0 inset-x-0 z-50 border-b border-white/5 bg-slate-950/70 backdrop-blur-2xl">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => onStart(ToolType.LANDING)}>
-            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/30 group-hover:scale-110 transition-transform">
-              <span className="text-white font-black text-xl">S</span>
+      {/* Navigation */}
+      <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 border-b ${scrolled ? 'bg-slate-950/80 backdrop-blur-2xl border-white/10 py-4' : 'bg-transparent border-transparent py-8'}`}>
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+          <div className="flex items-center gap-3 cursor-pointer group" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+            <div className="w-11 h-11 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-600/20 group-hover:scale-110 transition-transform">
+              <span className="text-white font-black text-2xl">S</span>
             </div>
             <span className="text-xl font-black text-white tracking-tighter uppercase">
               SnoopWerk<span className="text-indigo-400">.com</span>
             </span>
           </div>
-          <div className="hidden md:flex items-center gap-10">
+          
+          <div className="hidden lg:flex items-center gap-10">
             {['Engines', 'Workflow', 'Pricing', 'FAQ'].map((item) => (
-              <button key={item} onClick={() => scrollToSection(item.toLowerCase())} className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-all hover:translate-y-[-1px]">
+              <button 
+                key={item} 
+                onClick={() => scrollToSection(item.toLowerCase())} 
+                className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-all hover:translate-y-[-1px]"
+              >
                 {item}
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-4">
-            <button onClick={() => onStart(ToolType.AB_TESTING)} className="px-6 py-2.5 bg-white text-black text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-200 transition-all shadow-xl active:scale-95">
+
+          <div className="flex items-center gap-6">
+            <button 
+              onClick={() => onStart(ToolType.PRICING)} 
+              className="hidden sm:block text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
+            >
+              Log In
+            </button>
+            <button 
+              onClick={() => onStart(ToolType.THUMBNAILS)} 
+              className="px-7 py-3 bg-indigo-600 text-white text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-indigo-500 transition-all shadow-xl active:scale-95"
+            >
               Launch Studio
             </button>
           </div>
@@ -54,101 +76,140 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
       </nav>
 
       {/* Hero Section */}
-      <header className="relative z-10 pt-48 pb-32 px-6 max-w-7xl mx-auto text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 backdrop-blur-md mb-10 animate-in fade-in slide-in-from-top-4 duration-1000">
-          <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" />
-          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-400">The Future of Content Conversion</span>
+      <header className="relative z-10 pt-56 pb-32 px-6 max-w-7xl mx-auto text-center">
+        <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8 animate-in fade-in slide-in-from-top-4 duration-1000">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+          </span>
+          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-400">Neural Engine v2.5 Live</span>
+        </div>
+
+        {/* New Feature Announcement Bar */}
+        <div className="inline-flex mb-12 animate-in fade-in zoom-in duration-1000 delay-200">
+          <div className="px-6 py-3 bg-red-600/10 border border-red-500/30 rounded-2xl backdrop-blur-xl group hover:bg-red-600/20 transition-all cursor-default shadow-lg shadow-red-600/5">
+            <p className="text-[10px] font-[1000] text-red-500 uppercase tracking-[0.2em] leading-none flex items-center gap-2">
+              🔥 NEW: INTEGRATED VIRAL HOOK GENERATOR — CLICK LESS, GET MORE VIEWS 🔥
+            </p>
+          </div>
         </div>
         
-        <h1 className="text-6xl md:text-8xl lg:text-9xl font-black text-white tracking-tighter leading-[0.85] uppercase mb-12 drop-shadow-2xl animate-in fade-in slide-in-from-bottom-8 duration-1000">
-          Stop Guessing. <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-teal-400 to-purple-400">Start Dominating.</span>
+        <h1 className="text-5xl md:text-7xl lg:text-[7.5rem] font-[1000] text-white tracking-tighter leading-[0.85] uppercase mb-12 drop-shadow-2xl animate-in fade-in slide-in-from-bottom-8 duration-1000">
+          SNOOP<span className="text-indigo-500">@</span>WERK: <br />
+          <span className="gradient-text">The Viral Hook Factory.</span>
         </h1>
         
-        <p className="max-w-2xl mx-auto text-lg md:text-xl text-slate-400 font-medium mb-12 leading-relaxed animate-in fade-in duration-1000 delay-300">
-          SnoopWerk is the world's first AI Creative Engine designed for performance. 
-          Forge viral thumbnails, high-converting carousels, and print-ready designs that are mathematically optimized for engagement.
-        </p>
+        <div className="max-w-4xl mx-auto mb-16 space-y-4 animate-in fade-in duration-1000 delay-300">
+          <p className="text-2xl md:text-3xl text-white font-black uppercase tracking-[0.2em] leading-tight">
+            Precision Thumbnails. Lethal Hooks. <span className="text-indigo-400">Max Growth.</span>
+          </p>
+          <p className="text-lg md:text-xl text-slate-400 font-bold uppercase tracking-[0.3em]">
+            Thumbnail A/B Testing on Steroids.
+          </p>
+        </div>
         
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-in fade-in duration-1000 delay-500">
-          <button onClick={() => onStart(ToolType.AB_TESTING)} className="w-full sm:w-auto px-16 py-8 bg-indigo-600 text-white font-black rounded-3xl hover:bg-indigo-500 transition-all shadow-2xl shadow-indigo-600/30 uppercase tracking-[0.2em] text-xs active:scale-95">
-            Start Creating Free
+          <button onClick={() => onStart(ToolType.THUMBNAILS)} className="w-full sm:w-auto px-16 py-7 bg-white text-black font-black rounded-3xl hover:bg-slate-200 transition-all shadow-2xl shadow-white/5 uppercase tracking-[0.2em] text-xs active:scale-95">
+            Start Generating — Free
           </button>
-          <button onClick={() => scrollToSection('engines')} className="w-full sm:w-auto px-16 py-8 glass-effect text-white font-black rounded-3xl border border-white/10 hover:bg-white/5 transition-all uppercase tracking-[0.2em] text-xs active:scale-95">
-            Explore Features
+          <button onClick={() => scrollToSection('engines')} className="w-full sm:w-auto px-16 py-7 glass-effect text-white font-black rounded-3xl border border-white/10 hover:bg-white/5 transition-all uppercase tracking-[0.2em] text-xs active:scale-95">
+            Explore Engines
           </button>
         </div>
       </header>
 
-      {/* Brand Trust */}
-      <section className="relative z-10 py-16 border-y border-white/5 bg-slate-950/30">
-        <div className="max-w-7xl mx-auto px-6 overflow-hidden">
-          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 text-center mb-10">Trusted by modern creators & agencies worldwide</p>
-          <div className="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-30 grayscale hover:grayscale-0 transition-all duration-700">
-             <div className="text-2xl font-black italic tracking-tighter">VISIONARY</div>
-             <div className="text-2xl font-black italic tracking-tighter">GROWTH_HACK</div>
-             <div className="text-2xl font-black italic tracking-tighter">STUDIO.X</div>
-             <div className="text-2xl font-black italic tracking-tighter">PIXEL_LAB</div>
-             <div className="text-2xl font-black italic tracking-tighter">CREATOR.OS</div>
+      {/* Brand Roll */}
+      <section className="relative z-10 py-24 border-y border-white/5 bg-slate-950/40">
+        <div className="max-w-7xl mx-auto px-6">
+          <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-600 text-center mb-16">Trusted by 1,200+ Agencies & Modern Enterprise Nodes</p>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-16 items-center opacity-30 grayscale hover:grayscale-0 transition-all duration-700 px-12">
+             <div className="text-3xl font-black italic tracking-tighter text-center">VELOCITY</div>
+             <div className="text-3xl font-black italic tracking-tighter text-center">STUDIO.X</div>
+             <div className="text-3xl font-black italic tracking-tighter text-center">GROWTH.AI</div>
+             <div className="text-3xl font-black italic tracking-tighter text-center">SYNTH_LAB</div>
+             <div className="text-3xl font-black italic tracking-tighter text-center">MODERN_OS</div>
           </div>
         </div>
       </section>
 
-      {/* Engines Section */}
+      {/* Engines Grid */}
       <section id="engines" className="relative z-10 max-w-7xl mx-auto px-6 py-32">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-24">
-          <div className="max-w-xl">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-400 mb-6">AI Infrastructure</h2>
-            <h3 className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight uppercase">
-              The Engine Room of <span className="gradient-text">Virality.</span>
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12 mb-20">
+          <div className="max-w-3xl">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-400 mb-6">The Production Stack</h2>
+            <h3 className="text-4xl md:text-7xl font-[1000] text-white tracking-tighter leading-none uppercase mb-8">
+              One Command. <br /><span className="gradient-text">Infinite Output.</span>
             </h3>
+            <p className="text-slate-400 font-medium text-lg leading-relaxed max-w-xl">
+              Specialized neural engines designed for the next generation of creative speed. No bloat. Just performance.
+            </p>
           </div>
-          <p className="max-w-sm text-slate-500 font-medium text-sm leading-relaxed">
-            Every tool in SnoopWerk is specialized to tackle a specific conversion point. From first-glance thumbnails to multi-slide storytelling.
-          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {[
             { 
-              title: 'A/B Thumbnail Maker', 
-              desc: 'Generate multiple variations with real-time A/B visual comparison to find the highest-CTR hook.', 
-              icon: '📊', 
-              type: ToolType.AB_TESTING, 
-              color: 'from-indigo-600/20 to-indigo-600/5' 
-            },
-            { 
-              title: 'Carousel Architect', 
-              desc: 'Convert podcasts, videos, or scripts into stunning 10-slide Instagram carousels in seconds.', 
+              title: 'Carousel Studio', 
+              desc: 'Convert podcasts, scripts, or blog posts into elite 10-slide Instagram carousels in under 60 seconds.', 
               icon: '🎞️', 
               type: ToolType.THUMBNAILS, 
-              color: 'from-teal-600/20 to-teal-600/5' 
+              color: 'from-indigo-600/30 to-slate-900',
+              bgImage: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=1974&auto=format&fit=crop',
+              tag: 'TOP RATED'
             },
             { 
-              title: 'Merch Designer', 
-              desc: 'Surgical subject isolation for professional POD-ready designs with perfect alpha transparency.', 
+              title: 'Thumbnail Laboratory', 
+              desc: 'Forge high-impact visual hooks with real-time A/B variations. Engineered for max CTR.', 
+              icon: '📊', 
+              type: ToolType.AB_TESTING, 
+              color: 'from-teal-600/30 to-slate-900',
+              tag: 'GROWTH ENGINE'
+            },
+            { 
+              title: 'Merch Forge', 
+              desc: 'High-precision subject isolation and upscaling. Turn rough sketches into retail-ready assets.', 
               icon: '👕', 
               type: ToolType.POD_MERCH, 
-              color: 'from-purple-600/20 to-purple-600/5' 
+              color: 'from-purple-600/30 to-slate-900',
+              tag: 'CREATOR COMMERCE'
             },
             { 
-              title: 'Identity Lab', 
-              desc: 'Minimalist, high-end branding and vector-like logos for modern startups and personal brands.', 
+              title: 'Identity Hub', 
+              desc: 'Minimalist branding and vector-grade logos for modern startups. Speed-optimized delivery.', 
               icon: '✒️', 
               type: ToolType.LOGO_DESIGNER, 
-              color: 'from-pink-600/20 to-pink-600/5' 
+              color: 'from-pink-600/30 to-slate-900',
+              tag: 'PRO BRANDING'
             }
           ].map((feature, i) => (
-            <div key={i} onClick={() => onStart(feature.type)} className="group relative h-[450px] bg-slate-900/40 rounded-[48px] border border-white/5 p-10 flex flex-col justify-between hover:border-indigo-500/50 transition-all cursor-pointer overflow-hidden backdrop-blur-xl">
-              <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
-              <div className="relative z-10 w-16 h-16 bg-white/5 rounded-3xl flex items-center justify-center text-3xl group-hover:scale-110 group-hover:bg-indigo-600 transition-all duration-500">
-                {feature.icon}
+            <div 
+              key={i} 
+              onClick={() => onStart(feature.type)} 
+              className="group relative h-[440px] bg-slate-900/40 rounded-[48px] border border-white/5 p-10 flex flex-col justify-between hover:border-white/20 transition-all cursor-pointer overflow-hidden backdrop-blur-xl"
+            >
+              {/* Conditional Realistic Background Image - Only for Carousel Studio */}
+              {feature.bgImage && (
+                <div 
+                  className="absolute inset-0 z-0 opacity-20 group-hover:opacity-40 transition-opacity duration-1000 bg-cover bg-center grayscale group-hover:grayscale-0 scale-100 group-hover:scale-110"
+                  style={{ backgroundImage: `url("${feature.bgImage}")` }}
+                />
+              )}
+              
+              <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-40 group-hover:opacity-60 transition-opacity duration-700`} />
+              
+              <div className="relative z-10 flex justify-between items-start">
+                <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center text-3xl group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-500 border border-white/5 shadow-2xl">
+                  {feature.icon}
+                </div>
+                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 bg-black/40 px-4 py-2 rounded-full border border-white/10">{feature.tag}</span>
               </div>
+
               <div className="relative z-10">
-                <h4 className="text-2xl font-black text-white mb-4 uppercase tracking-tighter leading-none">{feature.title}</h4>
-                <p className="text-slate-500 text-sm font-medium leading-relaxed mb-10">{feature.desc}</p>
-                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                <h4 className="text-3xl md:text-4xl font-black text-white mb-4 uppercase tracking-tighter leading-none">{feature.title}</h4>
+                <p className="text-slate-300 text-base font-medium leading-relaxed mb-8 max-w-sm group-hover:text-white transition-colors drop-shadow-md font-semibold">{feature.desc}</p>
+                <div className="inline-flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-indigo-400 group-hover:text-white transition-colors">
+                  Launch Engine
+                  <svg className="w-4 h-4 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                 </div>
               </div>
             </div>
@@ -156,38 +217,28 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
         </div>
       </section>
 
-      {/* Workflow Path */}
-      <section id="workflow" className="relative z-10 bg-slate-950/50 py-32 border-y border-white/5">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-24">
-            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-teal-400 mb-6">Production Workflow</h2>
-            <h3 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter">Input to <span className="gradient-text">Asset.</span></h3>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
-            {[
-              { step: '01', title: 'Feed the Model', desc: 'Input your raw hook, script, or a website link. Our AI analyzes the visual potential of your concept.' },
-              { step: '02', title: 'Forge Variations', desc: 'The engine generates high-fidelity variations based on viral design principles and your selected style.' },
-              { step: '03', title: 'Optimize & Export', desc: 'Use Surgical Background Removal or AI Upscaling to refine your winners for 4K platform delivery.' }
-            ].map((item, i) => (
-              <div key={i} className="relative">
-                {i < 2 && <div className="hidden md:block absolute top-12 left-[100%] w-full h-[2px] bg-gradient-to-r from-indigo-500/50 to-transparent z-0" />}
-                <div className="relative z-10 p-10 bg-slate-900/60 rounded-[48px] border border-white/5 group hover:border-teal-500/50 transition-all">
-                  <span className="text-7xl font-black text-white/5 group-hover:text-teal-500/20 transition-colors block mb-8">{item.step}</span>
-                  <h4 className="text-2xl font-black text-white uppercase mb-4 tracking-tighter">{item.title}</h4>
-                  <p className="text-slate-500 font-medium leading-relaxed">{item.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+      {/* Stats Section */}
+      <section className="relative z-10 py-32 bg-indigo-600/5 border-y border-white/5">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12 text-center">
+          {[
+            { label: 'Creative Throughput', value: '4.2M+' },
+            { label: 'Enterprise Nodes', value: '620+' },
+            { label: 'Verified Creators', value: '150k' },
+            { label: 'Avg Conversion Lift', value: '44%' }
+          ].map((stat, i) => (
+            <div key={i} className="space-y-3">
+              <div className="text-4xl md:text-6xl font-[1000] text-white tracking-tighter">{stat.value}</div>
+              <div className="text-[9px] font-black uppercase tracking-[0.4em] text-indigo-400">{stat.label}</div>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Pricing Section (Integrated) */}
+      {/* Pricing Section */}
       <section id="pricing" className="relative z-10 max-w-7xl mx-auto px-6 py-32">
         <div className="text-center mb-24">
-          <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-purple-400 mb-6">Investment</h2>
-          <h3 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter">Scale Your <span className="gradient-text">Output.</span></h3>
+          <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-purple-400 mb-6">Access Tiers</h2>
+          <h3 className="text-4xl md:text-8xl font-[1000] text-white uppercase tracking-tighter">Choose Your <span className="gradient-text">Power.</span></h3>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -196,34 +247,34 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
               key={i} 
               className={`relative p-8 rounded-[40px] flex flex-col transition-all duration-500 hover:translate-y-[-8px] ${
                 plan.popular 
-                ? 'bg-gradient-to-br from-indigo-600/20 to-purple-700/20 border border-indigo-500 shadow-2xl shadow-indigo-500/10' 
-                : 'bg-slate-900/40 border border-white/5'
+                ? 'bg-gradient-to-br from-indigo-900/40 to-slate-950 border-2 border-indigo-500 shadow-3xl shadow-indigo-500/10' 
+                : 'bg-slate-900/30 border border-white/5'
               }`}
             >
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-500 text-white text-[9px] font-black px-6 py-1.5 rounded-full uppercase tracking-widest shadow-xl">
-                  Most Popular
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-500 text-white text-[9px] font-black px-6 py-2 rounded-full uppercase tracking-widest shadow-2xl">
+                  Best Value
                 </div>
               )}
-              <div className="mb-6">
-                <h4 className="text-xl font-black text-white uppercase tracking-tighter mb-2">{plan.name}</h4>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-black text-white">{plan.price}</span>
-                  <span className="text-[10px] font-bold text-slate-500 uppercase">/mo</span>
+              <div className="mb-10">
+                <h4 className="text-xl font-black text-white uppercase tracking-tighter mb-3">{plan.name}</h4>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-5xl font-black text-white">{plan.price}</span>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">/mo</span>
                 </div>
               </div>
-              <ul className="space-y-4 mb-10 flex-1">
-                {plan.features.slice(0, 4).map((f, j) => (
-                  <li key={j} className="flex items-start gap-3 text-xs font-semibold text-slate-400">
-                    <span className="text-indigo-500 mt-1">✦</span>
+              <ul className="space-y-4 mb-12 flex-1">
+                {plan.features.map((f, j) => (
+                  <li key={j} className="flex items-start gap-3 text-[11px] font-semibold text-slate-400 leading-tight">
+                    <span className="text-indigo-500 mt-1 shrink-0 text-base">✦</span>
                     {f}
                   </li>
                 ))}
               </ul>
               <button 
                 onClick={() => onStart(ToolType.PRICING)}
-                className={`w-full py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all ${
-                  plan.popular ? 'bg-white text-indigo-900 shadow-xl' : 'bg-white/5 text-white border border-white/10 hover:bg-white/10'
+                className={`w-full py-5 rounded-[20px] font-black uppercase tracking-[0.2em] text-[10px] transition-all ${
+                  plan.popular ? 'bg-white text-indigo-950 shadow-2xl hover:bg-slate-200' : 'bg-white/5 text-white border border-white/10 hover:bg-white/10'
                 }`}
               >
                 {plan.buttonText}
@@ -233,58 +284,58 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section id="faq" className="relative z-10 max-w-3xl mx-auto px-6 py-32 border-t border-white/5">
-        <div className="text-center mb-24">
-          <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 mb-6">Clarifications</h2>
-          <h3 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tighter">Expert <span className="gradient-text">Support.</span></h3>
+      {/* FAQ */}
+      <section id="faq" className="relative z-10 max-w-4xl mx-auto px-6 py-32 border-t border-white/5">
+        <div className="text-center mb-20">
+          <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500 mb-6">Intelligence Support</h2>
+          <h3 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter">Engine <span className="gradient-text">Specs.</span></h3>
         </div>
         <div className="space-y-4">
           {[
-            { q: "How are credits calculated?", a: "Standard image generations cost 1 credit. High-res upscales and surgical background removals cost 2 credits due to heavy compute requirements." },
-            { q: "Can I use SnoopWerk for client projects?", a: "Absolutely. All paid plans include a full commercial license for every asset generated on the platform." },
-            { q: "Does the Carousel Studio support multi-languages?", a: "Yes, our language models handle over 50 languages, optimized for local viral nuances." },
-            { q: "What makes SnoopWerk better than other AI tools?", a: "SnoopWerk is built on a custom stack specifically tuned for design aesthetics and high conversion metrics, not just generic art." }
+            { q: "How are credits allocated across engines?", a: "Your monthly credits are pooled. Standard AI tasks cost 1 credit. High-resolution upscaling, neural background removal, and complex studio edits cost 2 credits each." },
+            { q: "Is the commercial license global?", a: "Yes. Every asset generated on a paid plan (Basic, Pro, Agency) carries a permanent, royalty-free commercial license for global distribution." },
+            { q: "Can I upgrade or downgrade anytime?", a: "Absolutely. Changes take effect immediately. Remaining credits from your previous tier are rolled over for the current billing cycle." },
+            { q: "Does Carousel Studio support YouTube video imports?", a: "Yes. Simply paste any YouTube or Podcast URL, and our engine will extract the transcript, identify viral hooks, and generate a complete slide deck." }
           ].map((item, i) => (
-            <div key={i} className="bg-slate-900/40 rounded-[32px] border border-white/5 overflow-hidden">
-              <button onClick={() => setActiveFaq(activeFaq === i ? null : i)} className="w-full p-8 flex items-center justify-between text-left hover:bg-white/5 transition-colors">
-                <span className="text-white font-black uppercase tracking-tight text-sm pr-8">{item.q}</span>
-                <span className={`text-2xl transition-transform duration-300 ${activeFaq === i ? 'rotate-45 text-indigo-400' : 'text-slate-600'}`}>+</span>
+            <div key={i} className="bg-slate-900/30 rounded-[32px] border border-white/5 overflow-hidden transition-all hover:border-white/10">
+              <button onClick={() => setActiveFaq(activeFaq === i ? null : i)} className="w-full p-8 flex items-center justify-between text-left group">
+                <span className="text-white font-black uppercase tracking-tight text-base pr-8 group-hover:text-indigo-400 transition-colors">{item.q}</span>
+                <span className={`text-3xl transition-transform duration-500 ${activeFaq === i ? 'rotate-45 text-indigo-500' : 'text-slate-700'}`}>+</span>
               </button>
-              <div className={`transition-all duration-500 ease-in-out ${activeFaq === i ? 'max-h-60 p-8 pt-0 opacity-100' : 'max-h-0 opacity-0'}`}>
-                <p className="text-slate-400 text-sm leading-relaxed border-t border-white/5 pt-6">{item.a}</p>
+              <div className={`transition-all duration-500 ease-in-out ${activeFaq === i ? 'max-h-[300px] p-8 pt-0 opacity-100' : 'max-h-0 opacity-0'}`}>
+                <p className="text-slate-400 text-base leading-relaxed border-t border-white/5 pt-6">{item.a}</p>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Final CTA Footer */}
-      <footer className="relative z-10 pt-48 pb-24 px-6 max-w-7xl mx-auto text-center">
-        <div className="relative p-20 bg-gradient-to-br from-indigo-900/40 to-slate-950 rounded-[64px] border border-white/5 overflow-hidden">
-          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-600/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2" />
-          <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase mb-12 leading-none relative z-10">
-            Build Your <br /><span className="gradient-text">Viral Empire.</span>
+      {/* Footer / Final CTA */}
+      <footer className="relative z-10 pt-32 pb-16 px-6 max-w-7xl mx-auto">
+        <div className="relative p-16 md:p-24 bg-gradient-to-br from-indigo-950/50 to-slate-950 rounded-[64px] border border-white/10 overflow-hidden shadow-3xl text-center">
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[160px] -translate-y-1/2 translate-x-1/2" />
+          <h2 className="text-5xl md:text-[7rem] font-[1000] text-white tracking-tighter uppercase mb-12 leading-none relative z-10">
+            Own Your <br /><span className="gradient-text">Visual DNA.</span>
           </h2>
-          <button onClick={() => onStart(ToolType.AB_TESTING)} className="relative z-10 px-16 py-8 bg-white text-black text-xs font-black uppercase tracking-[0.3em] rounded-3xl shadow-3xl shadow-white/10 transition-all hover:scale-105 active:scale-95">
-            Launch Workspace Now
+          <button onClick={() => onStart(ToolType.THUMBNAILS)} className="relative z-10 px-16 py-6 bg-white text-black text-xs font-black uppercase tracking-[0.4em] rounded-[24px] shadow-3xl shadow-white/10 transition-all hover:scale-105 active:scale-95">
+            Deploy Now — Free
           </button>
         </div>
 
-        <div className="mt-48 flex flex-col md:flex-row items-center justify-between gap-12 pt-12 border-t border-white/5">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-               <span className="text-white font-black text-sm">S</span>
+        <div className="mt-32 flex flex-col md:flex-row items-center justify-between gap-8 pt-12 border-t border-white/5">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center">
+               <span className="text-white font-black text-xl">S</span>
             </div>
-            <span className="text-sm font-black text-white uppercase tracking-widest">SnoopWerk.com AI</span>
+            <span className="text-xs font-black text-white uppercase tracking-widest">SnoopWerk Studio</span>
           </div>
-          <div className="flex gap-10 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
-            <button onClick={() => scrollToSection('engines')} className="hover:text-white transition-colors">Workspace</button>
-            <button onClick={() => scrollToSection('pricing')} className="hover:text-white transition-colors">API & Enterprise</button>
+          <div className="flex gap-8 text-[9px] font-black uppercase tracking-[0.3em] text-slate-500">
+            <button onClick={() => scrollToSection('engines')} className="hover:text-white transition-colors">Engines</button>
+            <button onClick={() => scrollToSection('pricing')} className="hover:text-white transition-colors">Pricing</button>
             <a href="#" className="hover:text-white transition-colors">Terms</a>
-            <a href="#" className="hover:text-white transition-colors">Legal</a>
+            <a href="#" className="hover:text-white transition-colors">API</a>
           </div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-700">© 2025 SNOOPWERK STUDIO. ALL AI RIGHTS RESERVED.</p>
+          <p className="text-[9px] font-black uppercase tracking-widest text-slate-700">© 2025 SNOOPWERK OS. GLOBAL AI RIGHTS RESERVED.</p>
         </div>
       </footer>
     </div>
