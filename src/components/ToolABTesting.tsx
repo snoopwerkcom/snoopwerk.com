@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { generateAIImage, editAIImage, removeBackground, upscaleImage, analyzeMultimodalContent } from '../services/api';
 import { ToolType, AppToolsState, StyleOption, VariantEdit, DEFAULT_VARIANT_EDIT, GenerationStyle, UserCredits } from '../types';
@@ -44,6 +45,10 @@ const ToolABTesting: React.FC<ToolABTestingProps> = ({ state, credits, onUpdate,
   const [attachedAsset, setAttachedAsset] = useState<{ type: 'image' | 'video'; value: string; preview?: string } | null>(null);
   const [errorStatus, setErrorStatus] = useState<string | null>(null);
   
+  // Viral Hook States
+  const [hookSuggestions, setHookSuggestions] = useState<string[]>([]);
+  const [isSuggesting, setIsSuggesting] = useState(false);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
   const currentEditIndex = state.selectedVarIndex ?? 0;
   const currentEdit = state.variantEdits[currentEditIndex] || DEFAULT_VARIANT_EDIT;
@@ -52,6 +57,27 @@ const ToolABTesting: React.FC<ToolABTestingProps> = ({ state, credits, onUpdate,
     const newEdits = [...state.variantEdits];
     newEdits[currentEditIndex] = { ...currentEdit, ...updates };
     onUpdate({ variantEdits: newEdits });
+  };
+
+  const handleGetSuggestions = async () => {
+    if (!state.prompt) return;
+    setIsSuggesting(true);
+    try {
+      const instruction = `Based on the subject '${state.prompt}', generate exactly 3 viral YouTube titles (one Curiosity-based, one Negative/Fear-based, and one Listicle-based). Return ONLY a JSON string array like ["Title 1", "Title 2", "Title 3"]. Do not include markdown formatting or extra text.`;
+      const { summary, credits: c1 } = await analyzeMultimodalContent('prompt', state.prompt, instruction);
+      onUpdateCredits(c1);
+      
+      // Clean up potential markdown formatting if model ignores "ONLY JSON" instruction
+      const jsonStr = summary.replace(/```json|```/gi, '').trim();
+      const suggestions = JSON.parse(jsonStr);
+      if (Array.isArray(suggestions)) {
+        setHookSuggestions(suggestions);
+      }
+    } catch (error) {
+      console.error("Hook Suggestion Error:", error);
+    } finally {
+      setIsSuggesting(false);
+    }
   };
 
   const handleGenerate = async () => {
@@ -200,6 +226,7 @@ const ToolABTesting: React.FC<ToolABTestingProps> = ({ state, credits, onUpdate,
   const resetWorkstation = () => {
     setErrorStatus(null);
     setAttachedAsset(null);
+    setHookSuggestions([]);
     onUpdate({
       stage: 'IDLE',
       variations: [],
@@ -237,61 +264,67 @@ const ToolABTesting: React.FC<ToolABTestingProps> = ({ state, credits, onUpdate,
   if (state.view === 'LANDING') {
     return (
       <div className="h-full relative overflow-hidden bg-[#020202] flex flex-col font-inter">
+        {/* Dynamic Background */}
         <div className="absolute inset-0 z-0 group/bg overflow-hidden pointer-events-none">
           <div className="absolute inset-0 scale-100 transition-transform duration-[60s] group-hover/bg:scale-105">
              <div 
-               className="absolute top-[10%] left-[-2%] w-[35%] aspect-video rounded-[48px] border-4 border-white/10 shadow-[0_60px_100px_rgba(0,0,0,0.8)] bg-cover bg-center rotate-[-3deg] opacity-60 animate-in fade-in slide-in-from-left-24 duration-1000" 
+               className="absolute top-[5%] left-[-2%] w-[25%] aspect-video rounded-[32px] border-2 border-white/10 shadow-[0_40px_80px_rgba(0,0,0,0.8)] bg-cover bg-center rotate-[-3deg] opacity-40 animate-in fade-in slide-in-from-left-24 duration-1000" 
                style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1542038784456-1ea8e935640e?q=80&w=1974&auto=format&fit=crop")' }} 
              />
              <div 
-               className="absolute top-[25%] right-[-5%] w-[42%] aspect-video rounded-[48px] border-4 border-white/10 shadow-[0_60px_100px_rgba(0,0,0,0.8)] bg-cover bg-center rotate-[2deg] opacity-60 animate-in fade-in slide-in-from-right-24 duration-1000 delay-200" 
+               className="absolute top-[15%] right-[-5%] w-[30%] aspect-video rounded-[32px] border-2 border-white/10 shadow-[0_40px_80px_rgba(0,0,0,0.8)] bg-cover bg-center rotate-[2deg] opacity-40 animate-in fade-in slide-in-from-right-24 duration-1000 delay-200" 
                style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1492724441997-5dc865305da7?q=80&w=3840&auto=format&fit=crop")' }} 
              />
              <div 
-               className="absolute bottom-[15%] left-[4%] w-[32%] aspect-video rounded-[48px] border-4 border-white/10 shadow-[0_60px_100px_rgba(0,0,0,0.8)] bg-cover bg-center rotate-[5deg] opacity-70 animate-in fade-in slide-in-from-bottom-24 duration-1000 delay-400" 
+               className="absolute bottom-[15%] left-[4%] w-[22%] aspect-video rounded-[32px] border-2 border-white/10 shadow-[0_40px_80px_rgba(0,0,0,0.8)] bg-cover bg-center rotate-[5deg] opacity-50 animate-in fade-in slide-in-from-bottom-24 duration-1000 delay-400" 
                style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1558769132-cb1aea458c5e?q=80&w=1974&auto=format&fit=crop")' }} 
              />
           </div>
-          <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/40 to-black/95 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/95 via-black/60 to-black/95 backdrop-blur-[1px]" />
         </div>
 
+        {/* Content Centered to fit Viewport */}
         <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-6 pointer-events-none">
-          <div className="w-full max-w-7xl flex flex-col items-center gap-10 animate-in fade-in slide-in-from-bottom-12 duration-1000 pointer-events-auto">
-            <div className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-3xl mb-4 transition-transform hover:scale-105">
+          <div className="w-full max-w-5xl flex flex-col items-center gap-4 animate-in fade-in slide-in-from-bottom-4 duration-700 pointer-events-auto">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-3xl transition-transform hover:scale-105">
               <span className="relative flex h-2 w-2">
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
               </span>
-              <span className="text-[11px] font-black uppercase tracking-[0.5em] text-red-500">Thumbnail A/B Engine Active</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-red-500">A/B Intelligence Active</span>
             </div>
-            <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-[10rem] font-[1000] text-white tracking-tighter leading-none uppercase drop-shadow-[0_40px_120px_rgba(220,38,38,0.4)] whitespace-nowrap">
-              SNOOP<span className="text-red-600 inline-block px-1 sm:px-2 md:px-4">@</span>WERK
+            
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-[1000] text-white tracking-tighter leading-tight uppercase drop-shadow-[0_20px_40px_rgba(220,38,38,0.3)]">
+              SNOOP<span className="text-red-600 inline-block px-1">@</span>WERK: <br />
+              <span className="gradient-text">The Viral Hook Factory.</span>
             </h1>
-            <div className="space-y-6 max-w-4xl">
-              <p className="text-slate-100 font-black text-lg md:text-3xl uppercase tracking-[0.3em] leading-relaxed drop-shadow-2xl">
-                The Lab for <span className="text-red-500">Viral Thumbnail A/B Tests.</span>
+            
+            <div className="space-y-3 max-w-3xl">
+              <p className="text-lg md:text-2xl text-white font-black uppercase tracking-[0.1em] leading-tight drop-shadow-2xl">
+                Precision Thumbnails. Lethal Hooks. <span className="text-red-500">Max Growth.</span>
               </p>
-              <p className="text-slate-400 text-[10px] md:text-xs font-black uppercase tracking-[0.4em] opacity-60 max-w-xl mx-auto">
-                Generate two distinct landscape masterpieces from a single prompt and refine them for maximum click-through rates.
+              <p className="text-slate-400 text-xs md:text-sm font-black uppercase tracking-[0.3em] opacity-80 max-w-xl mx-auto italic">
+                Thumbnail A/B Testing on Steroids.
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-10 w-full max-w-2xl">
+            
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4 w-full max-w-md">
               <button 
                 onClick={() => onUpdate({ view: 'PRODUCTION' })}
-                className="group relative w-full sm:flex-1 px-12 py-8 bg-red-600 text-white font-[1000] rounded-[32px] text-[13px] uppercase tracking-[0.4em] transition-all hover:scale-[1.05] active:scale-95 shadow-[0_40px_80px_rgba(220,38,38,0.5)] overflow-hidden"
+                className="group relative w-full sm:flex-1 px-8 py-4 bg-red-600 text-white font-[1000] rounded-2xl text-[10px] uppercase tracking-[0.4em] transition-all hover:scale-[1.05] active:scale-95 shadow-[0_20px_40px_rgba(220,38,38,0.4)] overflow-hidden"
               >
                 <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500" />
                 <span className="relative z-10">Deploy Laboratory</span>
               </button>
               <button 
                 onClick={() => onAction && onAction(ToolType.LANDING)}
-                className="w-full sm:flex-1 px-12 py-8 bg-white/5 border border-white/10 text-white font-[1000] rounded-[32px] text-[13px] uppercase tracking-[0.4em] backdrop-blur-xl hover:bg-white/10 transition-all active:scale-95"
+                className="w-full sm:flex-1 px-8 py-4 bg-white/5 border border-white/10 text-white font-[1000] rounded-2xl text-[10px] uppercase tracking-[0.4em] backdrop-blur-xl hover:bg-white/10 transition-all active:scale-95"
               >
                 Return Base
               </button>
             </div>
           </div>
         </div>
-        <div className="absolute bottom-[-20%] left-[-10%] w-[120%] h-[60%] bg-red-600/10 blur-[160px] z-[5]" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[120%] h-[30%] bg-red-600/5 blur-[100px] z-[5]" />
       </div>
     );
   }
@@ -416,6 +449,39 @@ const ToolABTesting: React.FC<ToolABTestingProps> = ({ state, credits, onUpdate,
 
   return (
     <div className="h-screen flex bg-[#050505] overflow-hidden font-inter">
+      {/* Viral Hook Dropdown UI */}
+      {hookSuggestions.length > 0 && (
+        <div className="fixed inset-0 z-[1000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6 animate-in fade-in duration-300">
+          <div className="bg-[#0a0a0a] border-4 border-red-600 rounded-[48px] p-10 max-w-2xl w-full shadow-[0_60px_120px_-20px_rgba(220,38,38,0.5)] space-y-8 relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-8">
+              <button onClick={() => setHookSuggestions([])} className="text-slate-500 hover:text-white transition-colors">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-4xl font-[1000] text-white tracking-tighter uppercase leading-none">VIRAL_HOOK_ENGINE</h3>
+              <p className="text-[10px] font-black text-red-500 uppercase tracking-[0.5em]">Selected Strategy Suggestions</p>
+            </div>
+            <div className="grid grid-cols-1 gap-4">
+              {hookSuggestions.map((hook, idx) => (
+                <button 
+                  key={idx}
+                  onClick={() => {
+                    updateCurrentEdit({ overlayText: hook.toUpperCase() });
+                    setHookSuggestions([]);
+                  }}
+                  className="w-full p-6 bg-white/5 border border-white/10 rounded-3xl text-left text-white hover:bg-red-600 hover:border-red-400 transition-all group flex items-center justify-between"
+                >
+                  <span className="text-lg font-black uppercase tracking-tight pr-4">{hook}</span>
+                  <span className="text-2xl group-hover:scale-125 transition-transform shrink-0">⚡</span>
+                </button>
+              ))}
+            </div>
+            <p className="text-[9px] text-slate-600 font-black uppercase tracking-widest text-center pt-4">SNOOPWERK OS // NEURAL SUGGESTIONS V1.0</p>
+          </div>
+        </div>
+      )}
+
       <div className="flex-1 flex flex-col p-4 overflow-hidden relative min-h-0">
         <header className="flex items-center justify-between mb-4 px-4 h-14 shrink-0 bg-black/40 backdrop-blur-3xl rounded-2xl border border-white/5 z-20 shadow-2xl">
           <div className="flex items-center gap-4">
@@ -444,10 +510,12 @@ const ToolABTesting: React.FC<ToolABTestingProps> = ({ state, credits, onUpdate,
         </header>
 
         <div className="flex-1 flex items-center justify-center relative px-2 pb-2 overflow-hidden min-h-0">
-          {editingLoading && (
+          {(editingLoading || isSuggesting) && (
             <div className="absolute inset-0 z-[100] bg-black/85 backdrop-blur-2xl flex flex-col items-center justify-center rounded-[40px] border border-white/10">
               <div className="w-12 h-12 border-2 border-white/10 border-t-red-500 rounded-full animate-spin mb-4"></div>
-              <p className="text-white text-[9px] font-black uppercase tracking-[0.5em] animate-pulse">Neural Refinement Active...</p>
+              <p className="text-white text-[9px] font-black uppercase tracking-[0.5em] animate-pulse">
+                {isSuggesting ? 'CONSULTING VIRAL CORE...' : 'Neural Refinement Active...'}
+              </p>
             </div>
           )}
           <div className={`grid h-full w-full gap-4 transition-all duration-700 ease-in-out ${compareMode ? 'grid-cols-2' : 'grid-cols-1 max-w-[90%] max-h-[90%]'}`}>
@@ -485,14 +553,33 @@ const ToolABTesting: React.FC<ToolABTestingProps> = ({ state, credits, onUpdate,
         <div className="p-6 flex-1 overflow-y-auto custom-scrollbar space-y-8 bg-gradient-to-b from-[#080808] to-black pb-24">
           {activeTab === 'text' && (
             <div className="space-y-6 animate-in slide-in-from-right duration-400">
-              <div className="space-y-3">
+              <div className="space-y-3 relative">
                 <label className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-500 ml-1">Title Overlay</label>
-                <textarea 
-                  value={currentEdit.overlayText}
-                  onChange={(e) => updateCurrentEdit({ overlayText: e.target.value })}
-                  className="w-full bg-[#121212] border border-white/10 rounded-2xl p-4 text-[11px] text-white h-24 focus:ring-1 focus:ring-red-600 outline-none resize-none uppercase font-black shadow-inner"
-                  placeholder="EX: I SURVIVED..."
-                />
+                <div className="relative group/textarea">
+                  <textarea 
+                    value={currentEdit.overlayText}
+                    onChange={(e) => updateCurrentEdit({ overlayText: e.target.value })}
+                    className="w-full bg-[#121212] border border-white/10 rounded-2xl p-4 pr-12 text-[11px] text-white h-24 focus:ring-1 focus:ring-red-600 outline-none resize-none uppercase font-black shadow-inner"
+                    placeholder="EX: I SURVIVED..."
+                  />
+
+                  {/* Feature Tooltip for Magic Wand */}
+                  <div className="absolute -top-12 right-0 z-20 animate-in fade-in slide-in-from-bottom-2 duration-500 delay-500 pointer-events-none">
+                    <div className="bg-red-600 text-white text-[8px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-xl flex items-center gap-2">
+                      Magic Wand is here! Click for 3 viral hooks automatically.
+                      <div className="absolute bottom-[-4px] right-4 w-2 h-2 bg-red-600 rotate-45"></div>
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={handleGetSuggestions}
+                    disabled={isSuggesting || !state.prompt}
+                    className="absolute bottom-3 right-3 p-2 bg-red-600 hover:bg-red-500 text-white rounded-xl shadow-lg transition-all active:scale-95 disabled:opacity-30 group/wand animate-pulsate-red"
+                    title="Generate Viral Hooks"
+                  >
+                    <span className="text-lg leading-none group-hover/wand:rotate-12 transition-transform block">🪄</span>
+                  </button>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
