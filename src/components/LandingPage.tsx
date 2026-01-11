@@ -183,47 +183,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
         </div>
       </section>
 
-     {/* Pricing Section (Integrated) */}
-<section id="pricing" className="relative z-10 max-w-7xl mx-auto px-6 py-32">
-  <div className="text-center mb-24">
-    <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-purple-400 mb-6">Investment</h2>
-    <h3 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter">Scale Your <span className="gradient-text">Output.</span></h3>
-  </div>
-  
-  {/* Changed to flex and justify-center to center the single card */}
-  <div className="flex justify-center">
-    <div className="max-w-sm w-full">
-      {PRICING_PLANS.filter(plan => !plan.popular).map((plan, i) => (
-        <div 
-          key={i} 
-          className="relative p-8 rounded-[40px] flex flex-col transition-all duration-500 hover:translate-y-[-8px] bg-slate-900/40 border border-white/5"
-        >
-          <div className="mb-6">
-            <h4 className="text-xl font-black text-white uppercase tracking-tighter mb-2">{plan.name}</h4>
-            <div className="flex items-baseline gap-1">
-              <span className="text-4xl font-black text-white">{plan.price}</span>
-              <span className="text-[10px] font-bold text-slate-500 uppercase">/mo</span>
-            </div>
-          </div>
-          <ul className="space-y-4 mb-10 flex-1">
-            {plan.features.slice(0, 4).map((f, j) => (
-              <li key={j} className="flex items-start gap-3 text-xs font-semibold text-slate-400">
-                <span className="text-indigo-500 mt-1">✦</span>
-                {f}
-              </li>
-            ))}
-          </ul>
-          <button 
-            onClick={() => onStart(ToolType.PRICING)}
-            className="w-full py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all bg-white/5 text-white border border-white/10 hover:bg-white/10"
-          >
-            {plan.buttonText}
-          </button>
-        </div>
-      ))}
-    </div>
-  </div>
-</section>
+     
 
       {/* FAQ Section */}
       <section id="faq" className="relative z-10 max-w-3xl mx-auto px-6 py-32 border-t border-white/5">
