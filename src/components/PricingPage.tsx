@@ -9,108 +9,111 @@ interface PricingPageProps {
 
 const PricingPage: React.FC<PricingPageProps> = ({ onBack, onSelectPlan }) => {
   return (
-    <div className="relative overflow-hidden bg-slate-950 min-h-screen flex flex-col">
-      {/* Immersive background elements */}
-      <div className="absolute top-0 inset-x-0 h-64 bg-gradient-to-b from-indigo-900/20 to-transparent pointer-events-none"></div>
-      <div className="absolute top-1/4 -right-20 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[100px] pointer-events-none"></div>
-      <div className="absolute bottom-1/4 -left-20 w-[400px] h-[400px] bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none"></div>
-
+    <div className="relative bg-[#f9fafb] min-h-screen flex flex-col font-sans">
       {/* Header */}
       <nav className="relative z-10 flex items-center justify-between px-8 py-6 max-w-7xl mx-auto w-full shrink-0">
         <div className="text-xl font-black tracking-tight flex items-center gap-2 cursor-pointer" onClick={onBack}>
-          <span className="text-white pb-1">SnoopWerk<span className="text-blue-400">.com</span></span>
+          <span className="text-slate-900 pb-1">SnoopWerk<span className="text-indigo-600">.com</span></span>
         </div>
         <button 
           onClick={onBack}
-          className="text-slate-400 hover:text-white font-bold text-xs uppercase tracking-widest flex items-center gap-2 transition-colors"
+          className="text-slate-500 hover:text-slate-900 font-bold text-xs uppercase tracking-widest flex items-center gap-2 transition-colors"
         >
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-          Return Home
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+          Back
         </button>
       </nav>
 
-      <section className="relative z-10 max-w-7xl mx-auto px-6 flex-1 flex flex-col justify-center py-4 w-full">
-        <div className="text-center mb-12">
-          <div className="inline-block px-3 py-1 mb-3 rounded-full bg-indigo-500/10 border border-indigo-500/20 backdrop-blur-md">
-            <span className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.2em]">SaaS Studio Access</span>
-          </div>
-          
-          <h1 className="text-3xl md:text-5xl font-black text-white mb-2 tracking-tight">
-            Plans for <span className="gradient-text">Every Creative.</span>
+      <section className="relative z-10 max-w-7xl mx-auto px-6 flex-1 flex flex-col justify-center py-12 w-full">
+        <div className="text-center mb-16">
+          <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">
+            Simple, Transparent <span className="text-indigo-600">Pricing.</span>
           </h1>
-          <p className="text-slate-500 text-sm max-w-xl mx-auto font-medium">
-            Scalable solutions for solo creators and high-output professionals.
+          <p className="text-slate-500 text-lg max-w-2xl mx-auto font-medium uppercase tracking-widest text-sm">
+            High performance credit bundles for elite content production.
           </p>
         </div>
 
         {/* Pricing Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
-          {PRICING_PLANS.map((plan, i) => (
-            <div 
-              key={i} 
-              className={`relative p-6 rounded-[32px] flex flex-col transition-all duration-300 hover:translate-y-[-4px] ${
-                plan.popular 
-                ? 'bg-gradient-to-br from-indigo-600 to-purple-700 text-white shadow-[0_20px_40px_rgba(79,70,229,0.2)] scale-105 z-20 border border-white/20' 
-                : 'glass-effect border border-white/5 text-slate-300 hover:border-white/10'
-              }`}
-            >
-              {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-white text-indigo-600 text-[8px] font-black px-4 py-1 rounded-full uppercase tracking-[0.1em] shadow-lg">
-                  Popular
-                </div>
-              )}
-
-              <div className="mb-4 text-left">
-                <h3 className="text-lg font-black mb-0.5">{plan.name}</h3>
-                <p className={`text-[10px] font-medium leading-tight ${plan.popular ? 'text-indigo-100' : 'text-slate-500'}`}>
-                  {plan.description}
-                </p>
-              </div>
-
-              <div className="mb-4 text-left">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-black">{plan.price}</span>
-                  <span className={`text-[10px] uppercase font-bold opacity-60`}>/ mo</span>
-                </div>
-                <div className={`mt-2 px-3 py-1 inline-block rounded-full text-[8px] font-black uppercase tracking-widest ${
-                  plan.popular ? 'bg-white/20 text-white' : 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
-                }`}>
-                  {plan.credits}
-                </div>
-              </div>
-
-              <ul className="space-y-2 mb-6 flex-1 text-left">
-                {plan.features.map((feature, j) => (
-                  <li key={j} className="flex items-start gap-2 text-[11px] font-semibold leading-snug">
-                    <div className={`mt-0.5 shrink-0 w-3.5 h-3.5 rounded-full flex items-center justify-center ${
-                      plan.popular ? 'bg-white/20' : 'bg-indigo-500/10'
-                    }`}>
-                      <svg className={`w-2 h-2 ${plan.popular ? 'text-white' : 'text-indigo-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <span className={plan.popular ? 'text-indigo-50' : 'text-slate-400'}>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <button 
-                onClick={() => onSelectPlan(plan)}
-                className={`w-full py-3 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all shadow-lg ${
-                  plan.popular 
-                  ? 'bg-white text-indigo-600 hover:bg-slate-100 active:scale-95' 
-                  : 'bg-white/5 text-white hover:bg-white/10 border border-white/10 active:scale-95'
-                }`}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16 items-stretch">
+          {PRICING_PLANS.map((plan, i) => {
+            const isFree = plan.name === "FREE";
+            
+            return (
+              <div 
+                key={i} 
+                className={`relative bg-white p-10 rounded-[24px] flex flex-col transition-all duration-300 shadow-sm border border-slate-200 hover:shadow-xl hover:translate-y-[-4px] ${plan.popular ? 'ring-2 ring-indigo-600 border-transparent shadow-indigo-600/10' : ''}`}
               >
-                {plan.buttonText}
-              </button>
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-[10px] font-black px-6 py-2 rounded-full uppercase tracking-widest">
+                    Best Value
+                  </div>
+                )}
+                <div className="text-center mb-8">
+                  <h3 className="text-2xl font-black text-slate-900 mb-6 uppercase tracking-tighter">{plan.name}</h3>
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="flex items-baseline gap-0.5">
+                      <span className="text-6xl font-black text-slate-900 tracking-tighter">{plan.price}</span>
+                      {plan.credits && (
+                        <span className="text-lg font-bold text-slate-400">{plan.credits}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <ul className="space-y-4 mb-10 flex-1">
+                  {plan.features.map((feature, j) => (
+                    <li key={j} className="flex items-start gap-3 text-[13px] font-bold text-slate-700 uppercase tracking-tight">
+                      <svg className={`w-4 h-4 mt-0.5 shrink-0 ${isFree ? 'text-slate-400' : 'text-indigo-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <button 
+                  onClick={() => onSelectPlan(plan)}
+                  className={`w-full py-5 rounded-xl font-black uppercase tracking-[0.2em] text-[12px] transition-all text-center ${
+                    isFree 
+                    ? 'border-[2px] border-slate-200 text-slate-400 bg-white hover:bg-slate-50' 
+                    : plan.popular
+                    ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-600/30'
+                    : 'bg-slate-950 text-white hover:bg-slate-800'
+                  }`}
+                >
+                  {plan.buttonText}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Usage Note Section */}
+        <div className="max-w-3xl mx-auto bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center shrink-0">
+               <span className="text-2xl">📝</span>
             </div>
-          ))}
+            <div>
+              <h4 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-1">Usage Note</h4>
+              <p className="text-slate-500 text-sm font-medium leading-relaxed">
+                Credits are charged per image action (1 credit per generate, remove background, or upscale). Magic edits consume 2 credits. High-resolution upscales consume 2 credits.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
-      <footer className="relative z-10 border-t border-white/5 py-8 text-center shrink-0">
-        <p className="text-slate-600 text-[8px] font-black uppercase tracking-[0.3em]">Powered by SnoopWerk AI Intelligence</p>
+      <footer className="relative z-10 py-12 text-center shrink-0 border-t border-slate-200">
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em]">© 2025 SNOOPWERK STUDIO AI</p>
+          <div className="flex gap-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+            <a href="#" className="hover:text-slate-900">Privacy</a>
+            <a href="#" className="hover:text-slate-900">Terms</a>
+            <a href="#" className="hover:text-slate-900">Security</a>
+          </div>
+        </div>
       </footer>
     </div>
   );

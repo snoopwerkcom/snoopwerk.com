@@ -1,3 +1,4 @@
+
 export enum ToolType {
   LANDING = 'LANDING',
   AB_TESTING = 'AB_TESTING',
@@ -8,7 +9,8 @@ export enum ToolType {
   THUMBNAILS = 'THUMBNAILS',
   MAGIC_EDIT = 'MAGIC_EDIT',
   LOGO_DESIGNER = 'LOGO_DESIGNER',
-  PRICING = 'PRICING'
+  PRICING = 'PRICING',
+  INTELLIGENCE = 'INTELLIGENCE'
 }
 
 export type WorkstationStage = 'IDLE' | 'GENERATING' | 'EDITING' | 'REFINING' | 'COMPARE';
@@ -18,7 +20,9 @@ export type GenerationStyle =
   | 'realism' | 'cyberpunk' | 'cartoon' | 'cinematic' | 'manga'
   | 'none' | 'anime' | 'calligraphy' | 'looney_toon' | 'oil_painting' | 'photography' | 'psychedelic' | 'retro' | 'wave'
   | 'anime_cartoon' | 'gamer' | 'looneytoon' | 'newwave' | 'oilpainting' | 'photo_real' | 'psydelic' | 'pixar' | 'svg'
-  | 'black_and_white';
+  | 'black_and_white' | 'soft' | 'dark';
+
+export type TransitionStyle = 'fade' | 'slide' | 'zoom' | 'none';
 
 export interface StyleOption {
   id: GenerationStyle;
@@ -62,8 +66,11 @@ export const STYLES: StyleOption[] = [
 
 export interface VariantEdit {
   overlayText: string;
+  subText: string;
   textColor: string;
+  subTextColor: string;
   textSize: number;
+  subTextSize: number;
   textRotation: number;
   textX: number;
   textY: number;
@@ -76,11 +83,14 @@ export interface VariantEdit {
 
 export const DEFAULT_VARIANT_EDIT: VariantEdit = {
   overlayText: '',
+  subText: '',
   textColor: '#ffffff',
-  textSize: 50,
+  subTextColor: '#94a3b8',
+  textSize: 60,
+  subTextSize: 24,
   textRotation: 0,
   textX: 50,
-  textY: 50,
+  textY: 45,
   fontFamily: 'sans-serif',
   magicPrompt: '',
   isRemoveBg: false,
@@ -115,9 +125,10 @@ export interface AppToolsState {
     editedImage: string | null;
     variantEdits: VariantEdit[];
     shortlist: string[];
+    view: 'LANDING' | 'PRODUCTION';
   };
-  pod: { prompt: string; style: GenerationStyle; image: string | null; edit: VariantEdit };
-  logo: { prompt: string; style: GenerationStyle; image: string | null; edit: VariantEdit };
+  pod: { prompt: string; style: GenerationStyle; image: string | null; edit: VariantEdit; view: 'LANDING' | 'PRODUCTION' };
+  logo: { prompt: string; style: GenerationStyle; image: string | null; edit: VariantEdit; view: 'LANDING' | 'PRODUCTION' };
   removeBg: { source: string | null; result: string | null };
   upscale: { image: string | null };
   textEdit: { source: string | null; result: string | null; text: string; settings: TextSettings };
@@ -133,10 +144,18 @@ export interface AppToolsState {
     numSlides: number;
     summary: string;
     musicStyle: string;
+    transitionStyle: TransitionStyle;
     contentSource: {
       type: 'prompt' | 'image' | 'url' | 'podcast' | 'video';
       value: string;
     };
+  };
+  intelligence: {
+    source: string | null;
+    type: 'IMAGE' | 'VIDEO' | 'URL';
+    result: string | null;
+    isLoading: boolean;
+    prompt: string;
   };
 }
 
@@ -181,27 +200,27 @@ export const PRICING_PLANS: PricingPlan[] = [
   },
   {
     name: "BASIC",
-    price: "$15",
-    credits: "/month",
+    price: "$22",
+    credits: "",
     description: "",
-    features: ["60 credits / month", "Image generation", "Magic edit", "Background removal"],
-    buttonText: "Choose"
+    features: ["60 CREDITS", "Generate AI Images", "Remove Backgrounds", "4K Image Upscale", "Magic Edit Access"],
+    buttonText: "Choose Basic"
   },
   {
     name: "PRO",
-    price: "$25",
-    credits: "/month",
+    price: "$49",
+    credits: "",
     description: "",
-    features: ["180 credits / month", "Everything in BASIC", "Faster rendering", "Higher resolution"],
-    buttonText: "Choose",
+    features: ["180 CREDITS", "Everything in BASIC", "Faster Rendering", "Batch Processing", "Priority Synthesis"],
+    buttonText: "Choose Pro",
     popular: true
   },
   {
     name: "AGENCY",
-    price: "$59",
-    credits: "/month",
+    price: "$99",
+    credits: "",
     description: "",
-    features: ["500 credits / month", "Everything in PRO", "Team access", "Client export tools"],
-    buttonText: "Choose"
+    features: ["500 CREDITS", "Everything in PRO", "Team Access", "Unlimited Cloud History", "White-label Exports"],
+    buttonText: "Choose Agency"
   }
 ];
