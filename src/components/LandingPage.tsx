@@ -183,7 +183,55 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
         </div>
       </section>
 
-     
+      {/* Pricing Section (Integrated) */}
+      <section id="pricing" className="relative z-10 max-w-7xl mx-auto px-6 py-32">
+        <div className="text-center mb-24">
+          <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-purple-400 mb-6">Investment</h2>
+          <h3 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter">Scale Your <span className="gradient-text">Output.</span></h3>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {PRICING_PLANS.map((plan, i) => (
+            <div 
+              key={i} 
+              className={`relative p-8 rounded-[40px] flex flex-col transition-all duration-500 hover:translate-y-[-8px] ${
+                plan.popular 
+                ? 'bg-gradient-to-br from-indigo-600/20 to-purple-700/20 border border-indigo-500 shadow-2xl shadow-indigo-500/10' 
+                : 'bg-slate-900/40 border border-white/5'
+              }`}
+            >
+              {plan.popular && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-500 text-white text-[9px] font-black px-6 py-1.5 rounded-full uppercase tracking-widest shadow-xl">
+                  Most Popular
+                </div>
+              )}
+              <div className="mb-6">
+                <h4 className="text-xl font-black text-white uppercase tracking-tighter mb-2">{plan.name}</h4>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-4xl font-black text-white">{plan.price}</span>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase">/mo</span>
+                </div>
+              </div>
+              <ul className="space-y-4 mb-10 flex-1">
+                {plan.features.slice(0, 4).map((f, j) => (
+                  <li key={j} className="flex items-start gap-3 text-xs font-semibold text-slate-400">
+                    <span className="text-indigo-500 mt-1">✦</span>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <button 
+                onClick={() => onStart(ToolType.PRICING)}
+                className={`w-full py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all ${
+                  plan.popular ? 'bg-white text-indigo-900 shadow-xl' : 'bg-white/5 text-white border border-white/10 hover:bg-white/10'
+                }`}
+              >
+                {plan.buttonText}
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {/* FAQ Section */}
       <section id="faq" className="relative z-10 max-w-3xl mx-auto px-6 py-32 border-t border-white/5">
