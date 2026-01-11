@@ -187,40 +187,45 @@ export interface PricingPlan {
   features: string[];
   buttonText: string;
   popular?: boolean;
+  paymentLink?: string;
 }
 
 export const PRICING_PLANS: PricingPlan[] = [
   {
     name: "FREE",
     price: "$0",
-    credits: "",
-    description: "",
+    credits: "10",
+    description: "Trial",
     features: ["10 credits", "Image Generation", "Magic Edit", "No watermark"],
-    buttonText: "Get Started"
+    buttonText: "Get Started",
+    paymentLink: "", // Added empty string and comma
   },
   {
     name: "BASIC",
     price: "$22",
-    credits: "",
-    description: "",
+    credits: "60",
+    description: "Growth",
     features: ["60 CREDITS", "Generate AI Images", "Remove Backgrounds", "4K Image Upscale", "Magic Edit Access"],
-    buttonText: "Choose Basic"
+    buttonText: "Choose Basic",
+    paymentLink: import.meta.env.VITE_STRIPE_BASIC_LINK, // Added comma
   },
   {
     name: "PRO",
     price: "$49",
-    credits: "",
-    description: "",
+    credits: "180",
+    description: "Power",
     features: ["180 CREDITS", "Everything in BASIC", "Faster Rendering", "Batch Processing", "Priority Synthesis"],
     buttonText: "Choose Pro",
-    popular: true
+    popular: true,
+    paymentLink: import.meta.env.VITE_STRIPE_PRO_LINK, // Fixed to PRO link and added comma
   },
   {
     name: "AGENCY",
     price: "$99",
-    credits: "",
-    description: "",
+    credits: "500",
+    description: "Scale",
     features: ["500 CREDITS", "Everything in PRO", "Team Access", "Unlimited Cloud History", "White-label Exports"],
-    buttonText: "Choose Agency"
+    buttonText: "Choose Agency",
+    paymentLink: import.meta.env.VITE_STRIPE_AGENCY_LINK, // Added comma
   }
 ];
