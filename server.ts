@@ -13,17 +13,15 @@ const port = process.env.PORT || 3000;
 
 // Initialize Stripe and Gemini
 const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
-// Always use the process.env.API_KEY string directly
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-// In-memory credit store (In production, replace with Redis or Postgres)
+// In-memory credit store
 const db = {
   credits: new Map<string, any>(), // key: email or session_id
 };
 
 app.use(cors());
 
-// Stripe Webhook needs raw body for signature verification
+// Stripe Webhook needs raw body
 app.post('/api/v1/stripe-webhook', express.raw({ type: 'application/json' }) as any, (req, res) => {
   const sig = req.headers['stripe-signature'];
   let event;
@@ -42,8 +40,6 @@ app.post('/api/v1/stripe-webhook', express.raw({ type: 'application/json' }) as 
     const session = event.data.object as Stripe.Checkout.Session;
     const email = session.customer_details?.email;
     const amountPaid = session.amount_total || 0;
-    
-    // Add credits logic (e.g., $1 = 10 credits)
     const creditsToAdd = Math.floor(amountPaid / 100) * 10;
     
     if (email) {
@@ -59,21 +55,15 @@ app.post('/api/v1/stripe-webhook', express.raw({ type: 'application/json' }) as 
   res.json({ received: true });
 });
 
-// Regular JSON parsing for other routes
 app.use(express.json({ limit: '50mb' }) as any);
 
-/**
- * Route: Check Credits by Email or Session
- */
 app.get('/api/v1/user/credits', (req, res) => {
   const sessionId = req.headers['x-session-id'] as string;
   const email = req.query.email as string;
-  
   const key = email || sessionId;
   let credits = db.credits.get(key);
 
   if (!credits) {
-    // Default trial credits for new sessions
     credits = {
       remaining: 10.0,
       total: 10.0,
@@ -83,91 +73,294 @@ app.get('/api/v1/user/credits', (req, res) => {
     };
     db.credits.set(key, credits);
   }
-
   res.json(credits);
 });
 
+// Helper to get Gemini Client with up-to-date key
+const getAiClient = () => {
+  if (!process.env.API_KEY) {
+    throw new Error("API_KEY environment variable is not configured on the server.");
+  }
+  return new GoogleGenAI({ apiKey: process.env.API_KEY });
+};
+
 // --- AI ENGINE ROUTES ---
 
-// Image Generation (Nano Banana)
-app.post('/api/v1/ai/generate-image', async (req, res) => {
+// Image Generation
+app.post('/api/v1/ai/generate-image', async (req, res, next) => {
   const { prompt, aspectRatio } = req.body;
   const sessionId = req.headers['x-session-id'] as string;
-  
   try {
+    const ai = getAiClient();
     const userCredits = db.credits.get(sessionId) || { remaining: 10 };
     if (userCredits.remaining < 1) return res.status(402).json({ message: "Insufficient credits" });
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
-      contents: { parts: [{ text: `Render high-fidelity studio quality: ${prompt}` }] },
+      contents: [{ parts: [{ text: `Generate high-quality viral thumbnail asset: ${prompt}` }] }],
       config: { imageConfig: { aspectRatio: aspectRatio || '1:1' } }
     });
 
     const imagePart = response.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-    if (!imagePart?.inlineData) throw new Error("Generation failed");
+    if (!imagePart) {
+      console.error('Image Generation Error:', JSON.stringify(response, null, 2));
+      throw new Error("Generation failed - the model did not return an image. This might be due to safety filters.");
+    }
 
-    // Deduct credit
     userCredits.remaining -= 1;
     db.credits.set(sessionId, userCredits);
 
     res.json({
-      imageUrl: `data:image/png;base64,${imagePart.inlineData.data}`,
+      imageUrl: `data:image/png;base64,${imagePart.inlineData!.data}`,
       credits: userCredits
     });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    next(error);
+  }
+});
+
+// Edit Image (Magic Edits)
+app.post('/api/v1/ai/edit-image', async (req, res, next) => {
+  const { image, prompt } = req.body;
+  const sessionId = req.headers['x-session-id'] as string;
+  const cleanBase64 = image.includes('base64,') ? image.split('base64,')[1] : image;
+  try {
+    const ai = getAiClient();
+    const userCredits = db.credits.get(sessionId) || { remaining: 10 };
+    if (userCredits.remaining < 2) return res.status(402).json({ message: "Insufficient credits (2 required)" });
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-image',
+      contents: [{
+        parts: [
+          { inlineData: { data: cleanBase64, mimeType: 'image/png' } },
+          { text: `Edit this image as follows: ${prompt}` }
+        ]
+      }]
+    });
+
+    const part = response.candidates?.[0]?.content?.parts.find(p => p.inlineData);
+    if (!part) {
+      console.error('Edit Image Error:', JSON.stringify(response, null, 2));
+      throw new Error("Edit failed - the model did not return an edited image.");
+    }
+
+    userCredits.remaining -= 2;
+    db.credits.set(sessionId, userCredits);
+
+    res.json({
+      imageUrl: `data:image/png;base64,${part.inlineData!.data}`,
+      credits: userCredits
+    });
+  } catch (error: any) {
+    next(error);
+  }
+});
+
+// Upscale
+app.post('/api/v1/ai/upscale', async (req, res, next) => {
+  const { image } = req.body;
+  const sessionId = req.headers['x-session-id'] as string;
+  const cleanBase64 = image.includes('base64,') ? image.split('base64,')[1] : image;
+  try {
+    const ai = getAiClient();
+    const userCredits = db.credits.get(sessionId) || { remaining: 10 };
+    if (userCredits.remaining < 2) return res.status(402).json({ message: "Insufficient credits (2 required)" });
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-image',
+      contents: [{
+        parts: [
+          { inlineData: { data: cleanBase64, mimeType: 'image/png' } },
+          { text: "Enhance and upscale this image. Sharpen details and clarify textures." }
+        ]
+      }]
+    });
+
+    const part = response.candidates?.[0]?.content?.parts.find(p => p.inlineData);
+    if (!part) {
+      console.error('Upscale Error:', JSON.stringify(response, null, 2));
+      throw new Error("Upscale failed - the model did not return an enhanced image.");
+    }
+
+    userCredits.remaining -= 2;
+    db.credits.set(sessionId, userCredits);
+
+    res.json({
+      imageUrl: `data:image/png;base64,${part.inlineData!.data}`,
+      credits: userCredits
+    });
+  } catch (error: any) {
+    next(error);
+  }
+});
+
+// Analyze Content (Carousel Studio)
+app.post('/api/v1/ai/analyze-content', async (req, res, next) => {
+  const { sourceType, sourceValue, systemInstruction } = req.body;
+  const sessionId = req.headers['x-session-id'] as string;
+  try {
+    const ai = getAiClient();
+    const userCredits = db.credits.get(sessionId) || { remaining: 10 };
+    if (userCredits.remaining < 2) return res.status(402).json({ message: "Insufficient credits" });
+
+    let parts: any[] = [];
+    if (sourceType === 'image') {
+      const cleanBase64 = sourceValue.includes('base64,') ? sourceValue.split('base64,')[1] : sourceValue;
+      parts.push({ inlineData: { data: cleanBase64, mimeType: 'image/jpeg' } });
+      parts.push({ text: "Deeply analyze visual architecture, subtext, and potential hook points in this image." });
+    } else if (sourceType === 'url') {
+      parts.push({ text: `Extract mission-critical insights and viral hooks from this URL: ${sourceValue}.` });
+    } else if (sourceType === 'video') {
+       const cleanBase64 = sourceValue.includes('base64,') ? sourceValue.split('base64,')[1] : sourceValue;
+       parts.push({ inlineData: { data: cleanBase64, mimeType: 'video/mp4' } });
+       parts.push({ text: "Analyze this video for key narrative beats and high-impact visual hooks." });
+    } else {
+      parts.push({ text: `Deep reasoning over this creative vision: ${sourceValue}` });
+    }
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-pro-preview', // Upgraded to Pro
+      contents: [{ parts }],
+      config: { 
+        systemInstruction,
+        thinkingConfig: { thinkingBudget: 32768 }, // Max thinking budget
+        tools: [{ googleSearch: {} }] 
+      }
+    });
+
+    userCredits.remaining -= 2;
+    db.credits.set(sessionId, userCredits);
+
+    res.json({
+      summary: response.text || '',
+      credits: userCredits
+    });
+  } catch (error: any) {
+    next(error);
+  }
+});
+
+// Advanced Intelligence (Image/Video Understanding) using Gemini 3 Pro
+app.post('/api/v1/ai/intelligence', async (req, res, next) => {
+  const { sourceType, sourceValue, prompt } = req.body;
+  const sessionId = req.headers['x-session-id'] as string;
+  try {
+    const ai = getAiClient();
+    const userCredits = db.credits.get(sessionId) || { remaining: 10 };
+    if (userCredits.remaining < 3) return res.status(402).json({ message: "Insufficient credits (3 required for Deep Intelligence)" });
+
+    let parts: any[] = [];
+    const cleanBase64 = sourceValue.includes('base64,') ? sourceValue.split('base64,')[1] : sourceValue;
+    
+    if (sourceType === 'IMAGE') {
+      parts.push({ inlineData: { data: cleanBase64, mimeType: 'image/jpeg' } });
+    } else if (sourceType === 'VIDEO') {
+      parts.push({ inlineData: { data: cleanBase64, mimeType: 'video/mp4' } });
+    }
+
+    parts.push({ text: prompt || "Analyze this content for key information, context, and creative insights." });
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-pro-preview', 
+      contents: [{ parts }],
+      config: {
+        thinkingConfig: { thinkingBudget: 32768 }, // Max thinking budget
+        systemInstruction: "You are SnoopWerk's lead analyst. Provide extremely detailed, high-level intelligence based on the provided visual media. Focus on marketing opportunities, brand alignment, and technical details.",
+      }
+    });
+
+    userCredits.remaining -= 3;
+    db.credits.set(sessionId, userCredits);
+
+    res.json({
+      result: response.text || 'Analysis produced no output.',
+      credits: userCredits
+    });
+  } catch (error: any) {
+    next(error);
   }
 });
 
 // Background Removal
-app.post('/api/v1/ai/remove-bg', async (req, res) => {
+app.post('/api/v1/ai/remove-bg', async (req, res, next) => {
   const { image } = req.body;
+  const sessionId = req.headers['x-session-id'] as string;
   const cleanBase64 = image.includes('base64,') ? image.split('base64,')[1] : image;
   try {
+    const ai = getAiClient();
+    const userCredits = db.credits.get(sessionId) || { remaining: 10 };
+    if (userCredits.remaining < 2) return res.status(402).json({ message: "Insufficient credits" });
+
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
-      contents: {
+      contents: [{
         parts: [
-          { text: "GENERATE ALPHA MASK: Subject WHITE, Background BLACK." },
+          { text: "Extract subject and remove background. Professional studio cutout." },
           { inlineData: { data: cleanBase64, mimeType: 'image/png' } }
         ]
-      }
+      }]
     });
     const part = response.candidates?.[0]?.content?.parts.find(p => p.inlineData);
-    if (!part?.inlineData) throw new Error("Mask failed");
+    if (!part) {
+      console.error('Remove BG Error:', JSON.stringify(response, null, 2));
+      throw new Error("Background removal failed.");
+    }
+
+    userCredits.remaining -= 2;
+    db.credits.set(sessionId, userCredits);
 
     res.json({
       imageUrl: image,
-      maskUrl: `data:image/png;base64,${part.inlineData.data}`,
-      credits: { remaining: 8.0, total: 10.0 } // Mock update
+      maskUrl: `data:image/png;base64,${part.inlineData!.data}`,
+      credits: userCredits
     });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 });
 
-// Text Logic (Gemini 3)
-app.post('/api/v1/ai/generate-text', async (req, res) => {
+// Text Logic
+app.post('/api/v1/ai/generate-text', async (req, res, next) => {
   const { prompt, systemInstruction } = req.body;
+  const sessionId = req.headers['x-session-id'] as string;
   try {
+    const ai = getAiClient();
+    const userCredits = db.credits.get(sessionId) || { remaining: 10 };
+    if (userCredits.remaining < 1) return res.status(402).json({ message: "Insufficient credits" });
+
     const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: prompt,
-      config: { systemInstruction }
+      model: 'gemini-3-pro-preview', // Upgraded to Pro
+      contents: [{ parts: [{ text: prompt }] }],
+      config: { 
+        systemInstruction,
+        thinkingConfig: { thinkingBudget: 32768 } // Max thinking budget
+      }
     });
-    res.json({ text: response.text || '', credits: { remaining: 5.5, total: 10.0 } });
+
+    userCredits.remaining -= 1;
+    db.credits.set(sessionId, userCredits);
+
+    res.json({ text: response.text || '', credits: userCredits });
   } catch (error: any) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
+});
+
+// Global Error Handler
+app.use((err: any, req: any, res: any, next: any) => {
+  console.error('SnoopWerk Server Error:', err);
+  const status = err.status || 500;
+  res.status(status).json({ 
+    message: err.message || 'Internal Server Error',
+    status: status
+  });
 });
 
 // Serve Frontend Static Files
 const distPath = path.join(__dirname, '../dist');
-// Added 'as any' to fix TypeScript overload resolution error where RequestHandler is mistaken for PathParams
 app.use(express.static(distPath) as any);
 
-// SPA Handler: Route all non-API requests to index.html
 app.get('*', (req, res) => {
   if (!req.path.startsWith('/api')) {
     res.sendFile(path.join(distPath, 'index.html'));
@@ -175,5 +368,5 @@ app.get('*', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`SnoopWerk Studio running at http://localhost:${port}`);
+  console.log(`SnoopWerk Studio running at port ${port}`);
 });
