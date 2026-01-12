@@ -40,9 +40,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
           </div>
           <div className="hidden md:flex items-center gap-10">
             {['Engines', 'Workflow', 'Pricing', 'FAQ'].map((item) => (
-              <button key={item} onClick={() => scrollToSection(item.toLowerCase())} className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-all hover:translate-y-[-1px]">
-                {item}
-              </button>
+               
+<button 
+  key={item} 
+  onClick={() => item === 'Pricing' ? onStart(ToolType.PRICING) : scrollToSection(item.toLowerCase())} 
+  className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-all hover:translate-y-[-1px]"
+>
+  {item}
+</button>
             ))}
           </div>
           <div className="flex items-center gap-4">
