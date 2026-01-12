@@ -136,7 +136,7 @@ export const analyzeMultimodalContent = async (
   if (error) throw error;
   
   return {
-    summary: data.summary || data.text || 
-    'credits', data:'credit'
+    summary: data.summary || data.text || '',
+    credits: data.credits
   };
 };
