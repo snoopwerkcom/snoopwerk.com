@@ -79,23 +79,18 @@ const ToolPOD: React.FC<ToolPODProps> = ({ state, credits, onUpdate, onUpdateCre
   };
 
   const handleRemoveBG = async () => {
-    if (!state.image) return;
-    setMagicLoading(true);
-    try {
-      const res = await removeBackground(state.image);
-      const resultImage = res.maskUrl || res.imageUrl;
-      if (resultImage) {
-        onUpdateCredits(res.credits);
-        onUpdate({ image: resultImage });
-      } else {
-        alert("Removal engine returned no data.");
-      }
-    } catch (error) {
-      alert("Background removal failed.");
-    } finally {
-      setMagicLoading(false);
-    }
-  };
+  if (!state.image) return;
+  setMagicLoading(true);
+  try {
+    const { imageUrl, credits: newCredits } = await removeBackground(state.image);
+    onUpdateCredits(newCredits);
+    onUpdate({ image: imageUrl });
+  } catch (error: any) {
+    alert(`Background removal failed: ${error.message}`);
+  } finally {
+    setMagicLoading(false);
+  }
+};
 
   const handleUpscale = async () => {
     if (!state.image) return;
