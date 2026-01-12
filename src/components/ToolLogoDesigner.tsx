@@ -37,6 +37,7 @@ const FONTS = [
   { label: 'Montserrat', value: "'Montserrat', sans-serif" },
 ];
 
+
 const ToolLogoDesigner: React.FC<ToolLogoDesignerProps> = ({
   state,
   credits,
@@ -47,4 +48,5 @@ const ToolLogoDesigner: React.FC<ToolLogoDesignerProps> = ({
   const [loading, setLoading] = useState(false);
   const [magicLoading, setMagicLoading] = useState(false);
   const [fullscreenImg, setFullscreenImg] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'
+ const [activeTab, setActiveTab] =
+  useState<'create' | 'text' | 'refine'>('create');
