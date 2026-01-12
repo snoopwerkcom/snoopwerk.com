@@ -127,6 +127,55 @@ serve(async (req) => {
         }
       );
     }
+// ========================================
+// REMOVE BACKGROUND (remove.bg API ONLY)
+// ========================================
+if (action === 'remove-bg') {
+  const removeBgKey = Deno.env.get('REMOVEBG_API_KEY');
+  if (!removeBgKey) throw new Error("REMOVEBG_API_KEY not set");
+  if (!imageBase64) throw new Error("No image provided");
+
+  // ✅ Strip data URL
+  const cleanBase64 = imageBase64.includes(',')
+    ? imageBase64.split(',')[1]
+    : imageBase64;
+
+  // ✅ Convert base64 → Uint8Array
+  const binary = Uint8Array.from(atob(cleanBase64), c => c.charCodeAt(0));
+
+  // ✅ Create Blob (THIS IS THE FIX)
+  const blob = new Blob([binary], { type: "image/png" });
+
+  const form = new FormData();
+  form.append("image_file", blob, "image.png");
+  form.append("size", "auto");
+
+  const res = await fetch("https://api.remove.bg/v1.0/removebg", {
+    method: "POST",
+    headers: {
+      "X-Api-Key": removeBgKey,
+    },
+    body: form,
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`remove.bg failed: ${err}`);
+  }
+
+  const buffer = await res.arrayBuffer();
+  const base64 = btoa(
+    String.fromCharCode(...new Uint8Array(buffer))
+  );
+
+  return new Response(
+    JSON.stringify({
+      imageUrl: `data:image/png;base64,${base64}`,
+      credits_remaining: TESTING_MODE ? 999 : undefined,
+    }),
+    { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+  );
+}
 
     // ========================================
     // IMAGE GENERATION ACTIONS
@@ -136,8 +185,7 @@ serve(async (req) => {
     
     if (action === 'upscale') {
       finalPrompt = "Upscale and enhance this image. Improve clarity, textures, and sharpness while keeping it realistic.";
-    } else if (action === 'remove-bg') {
-      finalPrompt = "Remove the background completely and make it transparent or solid white.";
+   
     } else if (action === 'edit') {
       finalPrompt = `Edit this image: ${prompt}`;
     } else if (action === 'generate' && !imageBase64) {
