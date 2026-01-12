@@ -40,23 +40,34 @@ const ToolLogoDesigner: React.FC<ToolLogoDesignerProps> = ({ state, credits, onU
     onUpdate({ edit: { ...state.edit, ...updates } });
   };
 
-  const handleGenerate = async () => {
-    if (!state.prompt) return;
-    setLoading(true);
-    try {
-      const styleConfig = LOGO_STYLES.find(s => s.id === state.style);
-      const styleSuffix = styleConfig?.promptSuffix || '';
-      const basePrompt = `Professional minimalist vector logo, ${state.prompt}, high-end branding asset, white background`;
-      const finalPrompt = styleSuffix ? `${basePrompt}, ${styleSuffix}` : basePrompt;
-      const { imageUrl, credits: newCredits } = await generateAIImage(finalPrompt, "1:1");
-      onUpdateCredits(newCredits);
-      onUpdate({ image: imageUrl });
-    } catch (error) {
-      alert("Logo generation failed.");
-    } finally {
-      setLoading(false);
+ const handleGenerate = async () => {
+  if (!state.prompt) return;
+  setLoading(true);
+
+  try {
+    const styleConfig = LOGO_STYLES.find(s => s.id === state.style);
+    const styleSuffix = styleConfig?.promptSuffix || '';
+    const basePrompt = `Professional minimalist vector logo, ${state.prompt}, high-end branding asset, white background`;
+    const finalPrompt = styleSuffix ? `${basePrompt}, ${styleSuffix}` : basePrompt;
+
+    const result = await generateAIImage(finalPrompt, "1:1");
+
+    // ✅ FIX 1: always set image first
+    onUpdate({ image: result.imageUrl });
+
+    // ✅ FIX 2: only update credits if they exist
+    if (result.credits) {
+      onUpdateCredits(result.credits);
     }
-  };
+
+  } catch (error) {
+    console.error(error);
+    alert("Logo generation failed.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const handleUpscale = async () => {
     if (!state.image) return;
