@@ -10,9 +10,9 @@ export const stripePromise = loadStripe(stripePublishableKey || '');
 
 export const openStripePaymentLink = (planName: string) => {
   const paymentLinks: Record<string, string> = {
-    'Basic': import.meta.env.VITE_STRIPE_BASIC_LINK || '',
-    'Pro': import.meta.env.VITE_STRIPE_PRO_LINK || '',
-   'Agency': import.meta.env.VITE_STRIPE_AGENCY_LINK || '',
+    'BASIC': import.meta.env.VITE_STRIPE_BASIC_LINK || '',
+    'PRO': import.meta.env.VITE_STRIPE_PRO_LINK || '',
+   'AGENCY': import.meta.env.VITE_STRIPE_AGENCY_LINK || '',
   };
 
   const link = paymentLinks[planName];

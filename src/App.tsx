@@ -127,7 +127,7 @@ const App: React.FC = () => {
           <PricingPage 
             onBack={() => navigateToTool(ToolType.LANDING)} 
             onSelectPlan={(plan) => {
-              if (plan.name === 'Free Trial') {
+              if (plan.name === 'FREE') {
                 navigateToTool(ToolType.LANDING);
                 return;
               }
