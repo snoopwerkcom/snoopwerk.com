@@ -50,3 +50,12 @@ const ToolLogoDesigner: React.FC<ToolLogoDesignerProps> = ({
   const [fullscreenImg, setFullscreenImg] = useState<string | null>(null);
  const [activeTab, setActiveTab] =
   useState<'create' | 'text' | 'refine'>('create');
+    return (
+    <div>
+      {/* your JSX here */}
+    </div>
+  );
+};
+
+export default ToolLogoDesigner;
+
