@@ -628,11 +628,24 @@ const ToolABTesting: React.FC<ToolABTestingProps> = ({ state, credits, onUpdate,
             </div>
           )}
           {activeTab === 'enhance' && (
-            <div className="space-y-3 animate-in slide-in-from-right duration-400">
-              <button onClick={handleRemoveBg} className="w-full py-4 bg-teal-600 text-white font-black rounded-xl text-[9px] uppercase tracking-widest hover:bg-teal-700 transition-all active:scale-95">Remove BG</button>
-              <button onClick={handleUpscaleAction} className="w-full py-4 bg-red-600 text-white font-black rounded-xl text-[9px] uppercase tracking-widest hover:bg-red-700 transition-all active:scale-95">4K Synthesis</button>
-            </div>
-          )}
+  <div className="space-y-3 animate-in slide-in-from-right duration-400">
+    <button 
+      onClick={handleRemoveBg} 
+      disabled={state.selectedVarIndex === null || !state.variations[state.selectedVarIndex]}
+      className="w-full py-4 bg-teal-600 text-white font-black rounded-xl text-[9px] uppercase tracking-widest hover:bg-teal-700 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+    >
+      Remove BG
+    </button>
+    <button 
+      onClick={handleUpscaleAction} 
+      disabled={state.selectedVarIndex === null || !state.variations[state.selectedVarIndex]}
+      className="w-full py-4 bg-red-600 text-white font-black rounded-xl text-[9px] uppercase tracking-widest hover:bg-red-700 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+    >
+      4K Synthesis
+    </button>
+  </div>
+)}
+          
           {activeTab === 'magic' && (
             <div className="space-y-6 animate-in slide-in-from-right duration-400">
               <div className="space-y-3">
