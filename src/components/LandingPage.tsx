@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ToolType, PRICING_PLANS } from '../types';
 
@@ -6,12 +5,102 @@ interface LandingPageProps {
   onStart: (tool: ToolType) => void;
 }
 
+// ✅ DEVICE TRACKING HELPERS (ADD THESE AT THE TOP)
+const getDeviceId = (): string => {
+  let deviceId = localStorage.getItem('device_id');
+  
+  if (!deviceId) {
+    deviceId = `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    localStorage.setItem('device_id', deviceId);
+    console.log('🆔 New device ID created:', deviceId);
+  }
+  
+  return deviceId;
+};
+
+const hasEverBeenPaidUser = (): boolean => {
+  const deviceId = getDeviceId();
+  const paidDevices = localStorage.getItem('paid_devices');
+  
+  if (paidDevices) {
+    const deviceList = JSON.parse(paidDevices);
+    return deviceList.includes(deviceId);
+  }
+  
+  return false;
+};
+
+const markDeviceAsPaid = (email: string): void => {
+  const deviceId = getDeviceId();
+  const paidDevices = localStorage.getItem('paid_devices');
+  
+  let deviceList: string[] = [];
+  if (paidDevices) {
+    deviceList = JSON.parse(paidDevices);
+  }
+  
+  if (!deviceList.includes(deviceId)) {
+    deviceList.push(deviceId);
+    localStorage.setItem('paid_devices', JSON.stringify(deviceList));
+    console.log('💳 Device marked as paid user:', deviceId);
+  }
+  
+  localStorage.setItem('device_email', email);
+};
+
 const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // ✅ UPDATED: Smart handler with device tracking
+  const handleStartCreatingFree = () => {
+    const existingEmail = localStorage.getItem('user_email');
+    const deviceEmail = localStorage.getItem('device_email');
+    const existingCredits = localStorage.getItem('user_credits');
+    const isPaidDevice = hasEverBeenPaidUser();
+    
+    // CASE 1: Existing paid user with email
+    if (existingEmail) {
+      console.log('✅ Existing subscriber detected');
+      console.log('   Email:', existingEmail);
+      console.log('   Credits:', existingCredits);
+      
+      markDeviceAsPaid(existingEmail);
+      onStart(ToolType.AB_TESTING);
+      return;
+    }
+    
+    // CASE 2: Device was previously paid, restore email
+    if (isPaidDevice && deviceEmail) {
+      console.log('🔒 This device was previously a paid user');
+      console.log('   Restoring email:', deviceEmail);
+      
+      localStorage.setItem('user_email', deviceEmail);
+      
+      alert(`This device is registered to ${deviceEmail}. Please use your paid account or contact support to switch accounts.`);
+      onStart(ToolType.PRICING);
+      return;
+    }
+    
+    // CASE 3: Device previously paid but email removed
+    if (isPaidDevice && !deviceEmail) {
+      console.log('🔒 This device has been used by a paid user');
+      alert('This device has been used with a paid account. Please purchase credits to continue.');
+      onStart(ToolType.PRICING);
+      return;
+    }
+    
+    // CASE 4: Brand new user - give 10 free credits
+    console.log('✨ New user - giving 10 free credits');
+    localStorage.setItem('user_credits', '10');
+    console.log('🔍 Verification - localStorage now has:', localStorage.getItem('user_credits'));
+    localStorage.removeItem('user_email');
+    
+    onStart(ToolType.AB_TESTING);
   };
 
   return (
@@ -40,7 +129,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
           </div>
           <div className="hidden md:flex items-center gap-10">
             {['Engines', 'Workflow', 'Pricing', 'FAQ'].map((item) => (
-               
 <button 
   key={item} 
   onClick={() => item === 'Pricing' ? onStart(ToolType.PRICING) : scrollToSection(item.toLowerCase())} 
@@ -51,7 +139,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
             ))}
           </div>
           <div className="flex items-center gap-4">
-            <button onClick={() => onStart(ToolType.AB_TESTING)} className="px-6 py-2.5 bg-white text-black text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-200 transition-all shadow-xl active:scale-95">
+            <button onClick={handleStartCreatingFree} className="px-6 py-2.5 bg-white text-black text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-200 transition-all shadow-xl active:scale-95">
               Launch Studio
             </button>
           </div>
@@ -76,7 +164,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
         </p>
         
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-in fade-in duration-1000 delay-500">
-          <button onClick={() => onStart(ToolType.AB_TESTING)} className="w-full sm:w-auto px-16 py-8 bg-indigo-600 text-white font-black rounded-3xl hover:bg-indigo-500 transition-all shadow-2xl shadow-indigo-600/30 uppercase tracking-[0.2em] text-xs active:scale-95">
+          <button onClick={handleStartCreatingFree} className="w-full sm:w-auto px-16 py-8 bg-indigo-600 text-white font-black rounded-3xl hover:bg-indigo-500 transition-all shadow-2xl shadow-indigo-600/30 uppercase tracking-[0.2em] text-xs active:scale-95">
             Start Creating Free
           </button>
           <button onClick={() => scrollToSection('engines')} className="w-full sm:w-auto px-16 py-8 glass-effect text-white font-black rounded-3xl border border-white/10 hover:bg-white/5 transition-all uppercase tracking-[0.2em] text-xs active:scale-95">
@@ -271,7 +359,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
           <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase mb-12 leading-none relative z-10">
             Build Your <br /><span className="gradient-text">Viral Empire.</span>
           </h2>
-          <button onClick={() => onStart(ToolType.AB_TESTING)} className="relative z-10 px-16 py-8 bg-white text-black text-xs font-black uppercase tracking-[0.3em] rounded-3xl shadow-3xl shadow-white/10 transition-all hover:scale-105 active:scale-95">
+          <button onClick={handleStartCreatingFree} className="relative z-10 px-16 py-8 bg-white text-black text-xs font-black uppercase tracking-[0.3em] rounded-3xl shadow-3xl shadow-white/10 transition-all hover:scale-105 active:scale-95">
             Launch Workspace Now
           </button>
         </div>

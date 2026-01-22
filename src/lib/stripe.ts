@@ -12,7 +12,7 @@ export const openStripePaymentLink = (planName: string) => {
   const paymentLinks: Record<string, string> = {
     'BASIC': import.meta.env.VITE_STRIPE_BASIC_LINK || '',
     'PRO': import.meta.env.VITE_STRIPE_PRO_LINK || '',
-   'AGENCY': import.meta.env.VITE_STRIPE_AGENCY_LINK || '',
+    'AGENCY': import.meta.env.VITE_STRIPE_AGENCY_LINK || '',
   };
 
   const link = paymentLinks[planName];

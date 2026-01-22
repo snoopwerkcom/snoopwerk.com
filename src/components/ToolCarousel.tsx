@@ -202,32 +202,42 @@ const ToolCarousel: React.FC<ToolCarouselProps> = ({ state, credits, onUpdate, o
       const slides: CarouselSlide[] = [];
       
       for(let i = 0; i < lines.length; i++) {
-        if (stopGenerationRef.current) break;
-        setGenerationProgress(Math.floor(((i + 1) / lines.length) * 100));
-        
-        const [meta, textPart] = lines[i].split('|');
-        const visualDesc = meta.includes(':') ? meta.split(':')[1].trim() : meta.trim();
-        const overlayText = textPart ? textPart.trim() : "STAY FOCUSED";
+  if (stopGenerationRef.current) break;
+  setGenerationProgress(Math.floor(((i + 1) / lines.length) * 100));
+  
+  const [meta, textPart] = lines[i].split('|');
+  const visualDesc = meta.includes(':') ? meta.split(':')[1].trim() : meta.trim();
+  const overlayText = textPart ? textPart.trim() : "STAY FOCUSED";
 
-        // Generate the image with the style and user's context
-        const { imageUrl, credits: imgCredits } = await generateAIImage(`${visualDesc}, ${styleSuffix}`, state.aspectRatio);
-        
-        if (stopGenerationRef.current) break;
-        onUpdateCredits(imgCredits);
-        
-        slides.push({
-          id: `slide-${Date.now()}-${i}`,
-          imageUrl,
-          caption: lines[i],
-          edit: { 
-            ...DEFAULT_VARIANT_EDIT, 
-            overlayText: overlayText.toUpperCase(),
-            fontFamily: FONTS[1].value,
-            textSize: 80,
-            textColor: '#FFFFFF'
-          }
-        });
-      }
+  console.log(`🎨 Generating slide ${i+1}/${lines.length}...`);
+  
+  const { imageUrl, credits: imgCredits } = await generateAIImage(`${visualDesc}, ${styleSuffix}`, state.aspectRatio);
+  
+  console.log(`✅ Slide ${i+1} generated. Credits: ${imgCredits}`);
+  
+  if (stopGenerationRef.current) break;
+  
+  // ✅ Update credits immediately
+  onUpdateCredits(imgCredits);
+  
+  // ✅ Add delay to prevent race conditions
+  if (i < lines.length - 1) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
+  
+  slides.push({
+    id: `slide-${Date.now()}-${i}`,
+    imageUrl,
+    caption: lines[i],
+    edit: { 
+      ...DEFAULT_VARIANT_EDIT, 
+      overlayText: overlayText.toUpperCase(),
+      fontFamily: FONTS[1].value,
+      textSize: 80,
+      textColor: '#FFFFFF'
+    }
+  });
+}
       
       onUpdate({ slides, view: 'EDITOR', activeIndex: 0, isLoading: false });
     } catch (error) {

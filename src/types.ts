@@ -10,7 +10,8 @@ export enum ToolType {
   MAGIC_EDIT = 'MAGIC_EDIT',
   LOGO_DESIGNER = 'LOGO_DESIGNER',
   PRICING = 'PRICING',
-  INTELLIGENCE = 'INTELLIGENCE'
+  PAYMENT_SUCCESS = 'PAYMENT_SUCCESS', 
+  
 }
 
 export type WorkstationStage = 'IDLE' | 'GENERATING' | 'EDITING' | 'REFINING' | 'COMPARE';
@@ -150,13 +151,7 @@ export interface AppToolsState {
       value: string;
     };
   };
-  intelligence: {
-    source: string | null;
-    type: 'IMAGE' | 'VIDEO' | 'URL';
-    result: string | null;
-    isLoading: boolean;
-    prompt: string;
-  };
+  
 }
 
 export interface TextSettings {

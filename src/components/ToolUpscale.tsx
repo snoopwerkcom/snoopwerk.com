@@ -1,6 +1,5 @@
-
 import React, { useState, useRef } from 'react';
-import { editAIImage } from '../services/gemini';
+import { upscaleImage } from '../services/gemini';
 import { AppToolsState } from '../types';
 
 interface ToolUpscaleProps {
@@ -16,10 +15,18 @@ const ToolUpscale: React.FC<ToolUpscaleProps> = ({ state, onUpdate }) => {
     if (!state.image) return;
     setLoading(true);
     try {
-      const upscaled = await editAIImage(state.image, "High resolution, sharp, 4k quality, enhance details");
+      console.log('🚀 Starting upscale...');
+      console.log('📊 Image data length:', state.image.length);
+      console.log('📝 Image prefix:', state.image.substring(0, 50));
+      
+      const upscaled = await upscaleImage(state.image);
+      
+      console.log('✅ Upscale successful!');
       onUpdate({ image: upscaled });
-    } catch (error) {
-      alert("Upscaling failed.");
+    } catch (error: any) {
+      console.error('❌ Upscale error:', error);
+      // ✅ SHOW THE ACTUAL ERROR MESSAGE
+      alert(`Upscaling failed: ${error.message || error}`);
     } finally {
       setLoading(false);
     }
@@ -55,7 +62,7 @@ const ToolUpscale: React.FC<ToolUpscaleProps> = ({ state, onUpdate }) => {
           <button 
             onClick={handleUpscale}
             disabled={loading}
-            className="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-xl"
+            className="w-full py-4 bg-indigo-600 text-white font-bold rounded-2xl shadow-xl disabled:opacity-50"
           >
             {loading ? 'Processing...' : 'Upscale to Professional 4K'}
           </button>

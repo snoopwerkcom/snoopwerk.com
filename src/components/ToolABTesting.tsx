@@ -130,12 +130,13 @@ const ToolABTesting: React.FC<ToolABTestingProps> = ({ state, credits, onUpdate,
       const finalPromptB = `${userPrompt}. ${visualPromptB}${styleSuffix ? ', ' + styleSuffix : ''}, professional photography, 16:9 aspect ratio`;
       
       setGenerationProgress(30);
-      const res1 = await generateAIImage(finalPromptA, "16:9");
-      setGenerationProgress(65);
-      const res2 = await generateAIImage(finalPromptB, "16:9");
-      setGenerationProgress(100);
-      
-      onUpdateCredits(res2.credits);
+      // ✅ Generate sequentially to avoid race conditions
+const res1 = await generateAIImage(finalPromptA, "16:9");
+onUpdateCredits(res1.credits);  // Update credits immediately
+setGenerationProgress(65);
+
+const res2 = await generateAIImage(finalPromptB, "16:9");
+onUpdateCredits(res2.credits);  // Update credits again
 
       const newVariantEdits = [
         { ...DEFAULT_VARIANT_EDIT, overlayText: '', fontFamily: FONTS[1].value, textX: 50, textY: 50, textSize: 80 },

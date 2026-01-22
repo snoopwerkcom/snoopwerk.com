@@ -17,8 +17,9 @@ export const editAIImage = async (image: string, prompt: string) => {
 };
 
 export const upscaleImage = async (image: string) => {
-  const cleanBase64 = image.includes(',') ? image.split(',')[1] : image;
-  const result = await api.upscaleImage(cleanBase64);
+  // ✅ FIXED: Pass the FULL image string (with data:image/png;base64,)
+  // api.upscaleImage() will handle the cleaning internally
+  const result = await api.upscaleImage(image);
   return result.imageUrl;
 };
 
