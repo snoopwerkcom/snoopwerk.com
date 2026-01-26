@@ -60,10 +60,11 @@ serve(async (req) => {
 
       // ✅ Map price IDs to credit amounts
       const creditMap: { [key: string]: number } = {
-        'price_1QZnSVRsAox1xwbFo5xz2OYm': 60,   // Basic plan
-        'price_1QZnTTRsAox1xwbFJf6jSA6v': 500,  // Pro plan
-        'price_1QZnU6RsAox1xwbFU5lHZYy5': 1200, // Premium plan
+        'price_1SoPEMEpgkIxcbAj27YDZW83': 60,   // Basic
+        'price_1SoPDuEpgkIxcbAj0I1rNPfK': 180,  // Pro
+        'price_1SoPBMEpgkIxcbAjepzNxVBC': 500,  // Agency
       }
+
 
       const creditsToAdd = creditMap[priceId || ''] || 0
 
