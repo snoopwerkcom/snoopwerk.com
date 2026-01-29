@@ -94,9 +94,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
       return;
     }
     
-    // CASE 4: Brand new user - give 10 free credits
-    console.log('✨ New user - giving 10 free credits');
-    localStorage.setItem('user_credits', '10');
+    // CASE 4: Brand new user - give 100 free credits
+    console.log('✨ New user - giving 100 free credits');
+    localStorage.setItem('user_credits', '100');
     console.log('🔍 Verification - localStorage now has:', localStorage.getItem('user_credits'));
     localStorage.removeItem('user_email');
     

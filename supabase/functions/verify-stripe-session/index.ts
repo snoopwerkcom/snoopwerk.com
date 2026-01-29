@@ -10,9 +10,9 @@ const corsHeaders = {
 
 
 const PLAN_CREDITS = {
-  'BASIC': 60,
-  'PRO': 180,
-  'AGENCY': 500,
+  'BASIC': 600,
+  'PRO': 1800,
+  'AGENCY': 5000,
 };
 
 serve(async (req) => {

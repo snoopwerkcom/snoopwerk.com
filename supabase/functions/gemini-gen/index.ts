@@ -32,10 +32,10 @@ const corsHeaders = {
 }
 
 const CREDIT_COSTS = {
-  'generate': 2,
-  'edit': 2,
-  'remove-bg': 1,
-  'upscale': 1,
+  'generate': 20,
+  'edit': 20,
+  'remove-bg': 10,
+  'upscale': 10,
   'text': 0,
   'analyze': 0,
 }

@@ -97,14 +97,14 @@ const App: React.FC = () => {
       }));
     } else {
       // ✅ NEW USER - Give 10 free credits automatically!
-      console.log('🎁 New user detected! Giving 10 free credits');
-      localStorage.setItem('user_credits', '10');
+      console.log('🎁 New user detected! Giving 100 free credits');
+      localStorage.setItem('user_credits', '100');
       setToolsState(prev => ({
         ...prev,
         credits: {
           ...prev.credits,
-          remaining: 10,
-          total: 10
+          remaining: 100,
+          total: 100
         }
       }));
     }
@@ -199,15 +199,15 @@ const App: React.FC = () => {
             }
             
             if (plan.name === 'FREE') {
-              localStorage.setItem('user_credits', '10');
+              localStorage.setItem('user_credits', '100');
               localStorage.removeItem('user_email');
-              console.log('✅ Free tier activated: 10 credits');
+              console.log('✅ Free tier activated: 100 credits');
               setToolsState(prev => ({
                 ...prev,
                 credits: {
                   ...prev.credits,
-                  remaining: 10,
-                  total: 10
+                  remaining: 100,
+                  total: 100
                 }
               }));
               navigateToTool(ToolType.THUMBNAILS);

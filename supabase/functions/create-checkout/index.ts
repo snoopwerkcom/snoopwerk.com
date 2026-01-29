@@ -8,9 +8,9 @@ const corsHeaders = {
 }
 
 const PLAN_PRICES = {
-  BASIC: { amount: 999, credits: 60 },
-  PRO: { amount: 2999, credits: 180 },
-  AGENCY: { amount: 9999, credits: 500 },
+  BASIC: { amount: 2200, credits: 600 },
+  PRO: { amount: 4900, credits: 1800 },
+  AGENCY: { amount: 9900, credits: 5000 },
 }
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
