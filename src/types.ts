@@ -189,38 +189,38 @@ export const PRICING_PLANS: PricingPlan[] = [
   {
     name: "FREE",
     price: "$0",
-    credits: "10",
+    credits: "100",                    // Changed from "10"
     description: "Trial",
-    features: ["10 credits", "Image Generation", "Magic Edit", "No watermark"],
+    features: ["100 CREDITS", "Image Generation", "Magic Edit", "No watermark"],  // Changed from "10 credits"
     buttonText: "Get Started",
-    paymentLink: "", // Added empty string and comma
+    paymentLink: "",
   },
   {
     name: "BASIC",
     price: "$22",
-    credits: "60",
+    credits: "600",                    // Changed from "60"
     description: "Growth",
-    features: ["60 CREDITS", "Generate AI Images", "Remove Backgrounds", "4K Image Upscale", "Magic Edit Access"],
+    features: ["600 CREDITS", "Generate AI Images", "Remove Backgrounds", "4K Image Upscale", "Magic Edit Access"],  // Changed from "60 CREDITS"
     buttonText: "Choose Basic",
-    paymentLink: import.meta.env.VITE_STRIPE_BASIC_LINK, // Added comma
+    paymentLink: import.meta.env.VITE_STRIPE_BASIC_LINK,
   },
   {
     name: "PRO",
     price: "$49",
-    credits: "180",
+    credits: "1800",                   // Changed from "180"
     description: "Power",
-    features: ["180 CREDITS", "Everything in BASIC", "Faster Rendering", "Batch Processing", "Priority Synthesis"],
+    features: ["1800 CREDITS", "Everything in BASIC", "Faster Rendering", "Batch Processing", "Priority Synthesis"],  // Changed from "180 CREDITS"
     buttonText: "Choose Pro",
     popular: true,
-    paymentLink: import.meta.env.VITE_STRIPE_PRO_LINK, // Fixed to PRO link and added comma
+    paymentLink: import.meta.env.VITE_STRIPE_PRO_LINK,
   },
   {
     name: "AGENCY",
     price: "$99",
-    credits: "500",
+    credits: "5000",                   // Changed from "500"
     description: "Scale",
-    features: ["500 CREDITS", "Everything in PRO", "Team Access", "Unlimited Cloud History", "White-label Exports"],
+    features: ["5000 CREDITS", "Everything in PRO", "Team Access", "Unlimited Cloud History", "White-label Exports"],  // Changed from "500 CREDITS"
     buttonText: "Choose Agency",
-    paymentLink: import.meta.env.VITE_STRIPE_AGENCY_LINK, // Added comma
+    paymentLink: import.meta.env.VITE_STRIPE_AGENCY_LINK,
   }
 ];

@@ -98,8 +98,8 @@ const PricingPage: React.FC<PricingPageProps> = ({ onBack, onSelectPlan }) => {
             <div>
               <h4 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-1">Usage Note</h4>
               <p className="text-slate-500 text-sm font-medium leading-relaxed">
-                Credits are charged per image action (1 credit per generate, remove background, or upscale). Magic edits consume 2 credits. High-resolution upscales consume 2 credits.
-              </p>
+  Credits are charged per image action: Image generation (20 credits), Remove background (10 credits), Upscale (10 credits), Magic edit (20 credits).
+</p>
             </div>
           </div>
         </div>
