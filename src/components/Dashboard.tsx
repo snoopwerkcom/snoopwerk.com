@@ -217,7 +217,7 @@ const Dashboard: React.FC<DashboardProps> = ({ activeTool, toolsState, onUpdateS
   const credits = localStorage.getItem('user_credits') ? parseInt(localStorage.getItem('user_credits')!) : 0;
   const username = userEmail ? userEmail.split('@')[0] : '';
   const isFreeUser = credits > 0 && !userEmail;
-  const isLowCredit = credits > 0 && credits < 5;
+  const isLowCredit = credits > 0 && credits < 50;
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#0a0a0a]">
@@ -262,77 +262,65 @@ const Dashboard: React.FC<DashboardProps> = ({ activeTool, toolsState, onUpdateS
           </nav>
 
           {/* Credit Display */}
-          {credits > 0 && (
-            <div className="mt-4 space-y-2">
-              {isFreeUser && (
-                <div className={`w-full px-5 py-4 rounded-2xl border transition-all ${
-                  isLowCredit 
-                    ? 'bg-gradient-to-r from-orange-500/20 to-red-500/20 border-orange-500/50 animate-pulse shadow-lg shadow-orange-500/30' 
-                    : 'bg-white/5 border-white/10'
-                }`}>
-                  <div className="flex items-center gap-4">
-                    <span className="text-xl">{isLowCredit ? '⚠️' : '🎁'}</span>
-                    <div className="flex-1">
-                      <span className={`tracking-wide text-sm font-bold ${isLowCredit ? 'text-orange-400' : 'text-white'}`}>
-                        Free Credit {credits}
-                      </span>
-                    </div>
-                  </div>
-                  {isLowCredit && (
-                    <p className="mt-2 text-xs text-orange-300/90 leading-relaxed">
-                      You're running low on credits. Please add more to continue creating and downloading your work.
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {!isFreeUser && username && (
-                <div className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl bg-white/5 border border-white/10">
-                  <span className="text-xl">👤</span>
-                  <div className="flex-1 min-w-0">
-                    <span className="tracking-wide text-sm font-bold text-white truncate block">
-                      {username}
-                    </span>
-                  </div>
-                </div>
-              )}
-              
-              {!isFreeUser && (
-                <div className={`w-full px-5 py-4 rounded-2xl border transition-all ${
-                  isLowCredit 
-                    ? 'bg-gradient-to-r from-orange-500/20 to-red-500/20 border-orange-500/50 animate-pulse shadow-lg shadow-orange-500/30' 
-                    : 'bg-white/5 border-white/10'
-                }`}>
-                  <div className="flex items-center gap-4">
-                    <span className="text-xl">{isLowCredit ? '⚠️' : '⚡'}</span>
-                    <div className="flex-1">
-                      <span className={`tracking-wide text-sm font-bold ${isLowCredit ? 'text-orange-400' : 'text-white'}`}>
-                        {credits.toLocaleString()} Credits
-                      </span>
-                    </div>
-                  </div>
-                  {isLowCredit && (
-                    <p className="mt-2 text-xs text-orange-300/90 leading-relaxed">
-                      You're running low on credits. Please add more to continue creating and downloading your work.
-                    </p>
-                  )}
-                </div>
-              )}
-
-              <button
-                onClick={handleNavigateToPricing}
-                className={`w-full flex items-center justify-center gap-2 px-5 py-4 rounded-2xl font-bold transition-all duration-300 shadow-lg ${
-                  isLowCredit
-                    ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white hover:from-orange-600 hover:to-red-700 shadow-orange-500/40 animate-pulse'
-                    : 'bg-green-600 text-white hover:bg-green-500 hover:shadow-green-500/30'
-                }`}
-              >
-                <span className="text-xl">💳</span>
-                <span className="tracking-wide text-sm">{isLowCredit ? 'Add Credits Now' : 'Buy More'}</span>
-              </button>
-            </div>
-          )}
+        
+{credits > 0 && (
+  <div className="mt-4 space-y-2">
+    {isFreeUser && (
+      <div className={`w-full px-5 py-4 rounded-2xl border transition-all ${
+        isLowCredit 
+          ? 'bg-gradient-to-r from-orange-500/20 to-red-500/20 border-orange-500/50 animate-pulse shadow-lg shadow-orange-500/30' 
+          : 'bg-white/5 border-white/10'
+      }`}>
+        <div className="flex items-center gap-4">
+          <span className="text-xl">{isLowCredit ? '⚠️' : '🎁'}</span>
+          <div className="flex-1">
+            <span className={`tracking-wide text-sm font-bold ${isLowCredit ? 'text-orange-400' : 'text-white'}`}>
+              Free Credit {credits}
+            </span>
+          </div>
         </div>
+        {isLowCredit && (
+          <p className="mt-2 text-xs text-orange-300/90 leading-relaxed">
+            ⚠️ Low credits! You have less than 3 images remaining. Visit the Pricing page to purchase more credits.
+          </p>
+        )}
+      </div>
+    )}
+
+    {!isFreeUser && username && (
+      <div className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl bg-white/5 border border-white/10">
+        <span className="text-xl">👤</span>
+        <div className="flex-1 min-w-0">
+          <span className="tracking-wide text-sm font-bold text-white truncate block">
+            {username}
+          </span>
+        </div>
+      </div>
+    )}
+    
+    {!isFreeUser && (
+      <div className={`w-full px-5 py-4 rounded-2xl border transition-all ${
+        isLowCredit 
+          ? 'bg-gradient-to-r from-orange-500/20 to-red-500/20 border-orange-500/50 animate-pulse shadow-lg shadow-orange-500/30' 
+          : 'bg-white/5 border-white/10'
+      }`}>
+        <div className="flex items-center gap-4">
+          <span className="text-xl">{isLowCredit ? '⚠️' : '⚡'}</span>
+          <div className="flex-1">
+            <span className={`tracking-wide text-sm font-bold ${isLowCredit ? 'text-orange-400' : 'text-white'}`}>
+              {credits.toLocaleString()} Credits
+            </span>
+          </div>
+        </div>
+        {isLowCredit && (
+          <p className="mt-2 text-xs text-orange-300/90 leading-relaxed">
+            ⚠️ Low credits! You have less than 3 images remaining. Visit the Pricing page to purchase more credits.
+          </p>
+        )}
+      </div>
+    )}
+  </div>
+)}
 
         <div className="mt-auto p-8 border-t border-white/5">
           <button 
