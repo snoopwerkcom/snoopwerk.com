@@ -1,8 +1,8 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { generateAIImage, editAIImage, removeBackground, upscaleImage, analyzeMultimodalContent } from '../services/api';
 import { ToolType, AppToolsState, StyleOption, VariantEdit, DEFAULT_VARIANT_EDIT, GenerationStyle, UserCredits } from '../types';
-
+import { GoogleGenerativeAI } from "@google/generative-ai"; // ← ADD THIS LINE
 interface ToolABTestingProps {
   state: AppToolsState['abTesting'];
   credits: UserCredits;
@@ -58,27 +58,61 @@ const ToolABTesting: React.FC<ToolABTestingProps> = ({ state, credits, onUpdate,
     newEdits[currentEditIndex] = { ...currentEdit, ...updates };
     onUpdate({ variantEdits: newEdits });
   };
-
-  const handleGetSuggestions = async () => {
-    if (!state.prompt) return;
-    setIsSuggesting(true);
+useEffect(() => {
+  console.log('🔔 hookSuggestions changed:', hookSuggestions, 'Length:', hookSuggestions.length);
+}, [hookSuggestions]);
+ const handleGetSuggestions = async () => {
+  console.log('🪄 Magic Wand clicked');
+  if (!state.prompt) {
+    alert('Please enter a thumbnail concept first!');
+    return;
+  }
+  
+  setIsSuggesting(true);
+  
+  try {
+    const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    
+    const prompt = `Generate 3 viral YouTube titles for: "${state.prompt}". Return ONLY a JSON array: ["title1", "title2", "title3"]`;
+    
+    console.log('Calling Gemini...');
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+    console.log('AI response:', text);
+    
+    let suggestions: string[] = [];
+    
     try {
-      const instruction = `Based on the subject '${state.prompt}', generate exactly 3 viral YouTube titles (one Curiosity-based, one Negative/Fear-based, and one Listicle-based). Return ONLY a JSON string array like ["Title 1", "Title 2", "Title 3"]. Do not include markdown formatting or extra text.`;
-      const { summary, credits: c1 } = await analyzeMultimodalContent('prompt', state.prompt, instruction);
-      onUpdateCredits(c1);
-      
-      // Clean up potential markdown formatting if model ignores "ONLY JSON" instruction
-      const jsonStr = summary.replace(/```json|```/gi, '').trim();
-      const suggestions = JSON.parse(jsonStr);
-      if (Array.isArray(suggestions)) {
-        setHookSuggestions(suggestions);
-      }
-    } catch (error) {
-      console.error("Hook Suggestion Error:", error);
-    } finally {
-      setIsSuggesting(false);
+      let cleaned = text.replace(/```json|```/gi, '').trim();
+      const match = cleaned.match(/\[[\s\S]*\]/);
+      if (match) cleaned = match[0];
+      suggestions = JSON.parse(cleaned);
+    } catch {
+      console.log('Using fallback titles');
+      const s = state.prompt.toUpperCase();
+      suggestions = [
+        `I TRIED ${s} FOR 24 HOURS!`,
+        `You WON'T BELIEVE What Happened With ${s}!`,
+        `The TRUTH About ${s}`
+      ];
     }
-  };
+    
+    console.log('Setting suggestions:', suggestions);
+    setHookSuggestions(suggestions);
+    
+  } catch (error: any) {
+    console.error('Error:', error);
+    const s = state.prompt.toUpperCase();
+    setHookSuggestions([
+      `SHOCKING: ${s}!`,
+      `I Can't Believe ${s}...`,
+      `${s}: The Truth`
+    ]);
+  } finally {
+    setIsSuggesting(false);
+  }
+};
 
   const handleGenerate = async () => {
     const userPrompt = state.prompt || (attachedAsset ? `the subject of this ${attachedAsset.type}` : '');

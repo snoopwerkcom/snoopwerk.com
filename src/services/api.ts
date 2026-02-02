@@ -48,8 +48,14 @@ const callGeminiGen = async <T = any>(payload: any): Promise<T> => {
   let previousCredits: number | null = null;
   
   if (isFreeUser && typeof window !== 'undefined') {
+    // ✅ FIXED: Correct credit costs
     const CREDIT_COSTS: Record<string, number> = {
-      'generate': 2, 'edit': 2, 'upscale': 1, 'remove-bg': 1, 'text': 0, 'analyze': 0,
+      'generate': 20,    // ✅ FIXED: Was 2, now 20
+      'edit': 20,        // ✅ FIXED: Was 2, now 20
+      'upscale': 10,     // ✅ FIXED: Was 1, now 10
+      'remove-bg': 10,   // ✅ FIXED: Was 1, now 10
+      'text': 0, 
+      'analyze': 0,
     };
     const cost = CREDIT_COSTS[payload.action] || 0;
     const currentCredits = parseInt(localStorage.getItem('user_credits') || '0');
