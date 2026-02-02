@@ -8,7 +8,6 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-
 const PLAN_CREDITS = {
   'BASIC': 600,
   'PRO': 1800,
@@ -23,9 +22,9 @@ serve(async (req) => {
   }
 
   try {
-   
+    // ✅ FIX: Extract sessionId from request body (THIS WAS MISSING!)
+    const { sessionId } = await req.json();
     console.log('📥 Session ID:', sessionId);
-    
 
     if (!sessionId) {
       return new Response(
@@ -89,7 +88,7 @@ serve(async (req) => {
         .from('customers')
         .update({
           credits_remaining: newBalance,
-         plan_type: planType,
+          plan_type: planType,
           updated_at: new Date().toISOString(),
         })
         .eq('stripe_customer_id', customerId);
@@ -112,38 +111,38 @@ serve(async (req) => {
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
-     } else {
-  // NEW CUSTOMER: Only add purchase credits (ignore frontend existingCredits)
-  console.log('🆕 New customer - creating...');
-  console.log(`➕ Purchase credits: ${credits}`);
-  
-  await supabase.from('customers').insert({
-    stripe_customer_id: customerId,
-    email: customerEmail,
-    credits_remaining: credits,  // ✅ Only the purchased amount
-    plan_type: planType,
-    subscription_status: 'active',
-  });
+    } else {
+      // NEW CUSTOMER: Only add purchase credits (ignore frontend existingCredits)
+      console.log('🆕 New customer - creating...');
+      console.log(`➕ Purchase credits: ${credits}`);
+      
+      await supabase.from('customers').insert({
+        stripe_customer_id: customerId,
+        email: customerEmail,
+        credits_remaining: credits,  // ✅ Only the purchased amount
+        plan_type: planType,
+        subscription_status: 'active',
+      });
 
-  await supabase.from('credit_transactions').insert({
-    stripe_customer_id: customerId,
-    action_type: 'PURCHASE',
-    credits_change: credits,
-    credits_after: credits,  // ✅ Matches the actual balance
-  });
+      await supabase.from('credit_transactions').insert({
+        stripe_customer_id: customerId,
+        action_type: 'PURCHASE',
+        credits_change: credits,
+        credits_after: credits,  // ✅ Matches the actual balance
+      });
 
-  console.log('✅ New customer created successfully');
-  
-  return new Response(
-    JSON.stringify({
-      success: true,
-      customerId,
-      email: customerEmail,
-      credits: credits,  // ✅ Return only purchased credits
-    }),
-    { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-  );
-}
+      console.log('✅ New customer created successfully');
+      
+      return new Response(
+        JSON.stringify({
+          success: true,
+          customerId,
+          email: customerEmail,
+          credits: credits,  // ✅ Return only purchased credits
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
   } catch (error: any) {
     console.error('❌ ERROR:', {
       message: error.message,
