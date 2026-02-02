@@ -1,122 +1,92 @@
+// LandingPage.tsx - CORRECT FLOW
+// "Create" button → Direct navigation (no check)
+// Tool cards → Check credits and show popup if needed
+
 import React, { useState } from 'react';
 import { ToolType, PRICING_PLANS } from '../types';
+import EmailSignupModal from './EmailSignupModal';
 
 interface LandingPageProps {
   onStart: (tool: ToolType) => void;
+  currentCredits?: number;
+  userEmail?: string;
 }
 
-// ✅ DEVICE TRACKING HELPERS (ADD THESE AT THE TOP)
-const getDeviceId = (): string => {
-  let deviceId = localStorage.getItem('device_id');
-  
-  if (!deviceId) {
-    deviceId = `device_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    localStorage.setItem('device_id', deviceId);
-    console.log('🆔 New device ID created:', deviceId);
-  }
-  
-  return deviceId;
-};
-
-const hasEverBeenPaidUser = (): boolean => {
-  const deviceId = getDeviceId();
-  const paidDevices = localStorage.getItem('paid_devices');
-  
-  if (paidDevices) {
-    const deviceList = JSON.parse(paidDevices);
-    return deviceList.includes(deviceId);
-  }
-  
-  return false;
-};
-
-const markDeviceAsPaid = (email: string): void => {
-  const deviceId = getDeviceId();
-  const paidDevices = localStorage.getItem('paid_devices');
-  
-  let deviceList: string[] = [];
-  if (paidDevices) {
-    deviceList = JSON.parse(paidDevices);
-  }
-  
-  if (!deviceList.includes(deviceId)) {
-    deviceList.push(deviceId);
-    localStorage.setItem('paid_devices', JSON.stringify(deviceList));
-    console.log('💳 Device marked as paid user:', deviceId);
-  }
-  
-  localStorage.setItem('device_email', email);
-};
-
-const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ 
+  onStart,
+  currentCredits = 0,
+  userEmail
+}) => {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [pendingTool, setPendingTool] = useState<ToolType | null>(null);
 
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // ✅ UPDATED: Smart handler with device tracking
+  // ✅ CORRECT: "Create" button just navigates directly
   const handleStartCreatingFree = () => {
-    const existingEmail = localStorage.getItem('user_email');
-    const deviceEmail = localStorage.getItem('device_email');
-    const existingCredits = localStorage.getItem('user_credits');
-    const isPaidDevice = hasEverBeenPaidUser();
+    console.log('🚀 Create button clicked - navigating to tool page');
+    onStart(ToolType.AB_TESTING);  // Just go there, no checks!
+  };
+
+  // ✅ CORRECT: Tool cards check credits BEFORE navigation
+  const handleToolClick = (tool: ToolType) => {
+    console.log('🎯 Tool clicked:', tool);
+    console.log('   Current credits:', currentCredits);
+    console.log('   User email:', userEmail);
     
-    // CASE 1: Existing paid user with email
-    if (existingEmail) {
-      console.log('✅ Existing subscriber detected');
-      console.log('   Email:', existingEmail);
-      console.log('   Credits:', existingCredits);
-      
-      markDeviceAsPaid(existingEmail);
-      onStart(ToolType.AB_TESTING);
+    // If user HAS credits → Direct navigation
+    if (currentCredits > 0) {
+      console.log('✅ User has credits - navigating');
+      onStart(tool);
       return;
     }
     
-    // CASE 2: Device was previously paid, restore email
-    if (isPaidDevice && deviceEmail) {
-      console.log('🔒 This device was previously a paid user');
-      console.log('   Restoring email:', deviceEmail);
-      
-      localStorage.setItem('user_email', deviceEmail);
-      
-      alert(`This device is registered to ${deviceEmail}. Please use your paid account or contact support to switch accounts.`);
+    // User has NO credits - check if they already claimed
+    const claimedEmail = localStorage.getItem('user_email');
+    
+    if (claimedEmail || userEmail) {
+      // Already claimed but out of credits → Go to pricing
+      console.log('⚠️ User out of credits - showing pricing');
       onStart(ToolType.PRICING);
       return;
     }
     
-    // CASE 3: Device previously paid but email removed
-    if (isPaidDevice && !deviceEmail) {
-      console.log('🔒 This device has been used by a paid user');
-      alert('This device has been used with a paid account. Please purchase credits to continue.');
-      onStart(ToolType.PRICING);
-      return;
-    }
+    // New user with 0 credits → Show email popup
+    console.log('📧 New user - showing email popup');
+    setPendingTool(tool);
+    setShowEmailModal(true);
+  };
+
+  const handleEmailSuccess = (email: string, credits: number) => {
+    console.log('✅ Credits claimed:', email, credits);
+    setShowEmailModal(false);
     
-    // CASE 4: Brand new user - give 100 free credits
-    console.log('✨ New user - giving 100 free credits');
-    localStorage.setItem('user_credits', '100');
-    console.log('🔍 Verification - localStorage now has:', localStorage.getItem('user_credits'));
-    localStorage.removeItem('user_email');
+    // Navigate to the tool they wanted
+    const targetTool = pendingTool || ToolType.AB_TESTING;
+    setPendingTool(null);
     
-    onStart(ToolType.AB_TESTING);
+    setTimeout(() => {
+      onStart(targetTool);
+    }, 500);
   };
 
   return (
     <div className="relative min-h-screen bg-[#020617] text-slate-200 selection:bg-indigo-500/30 overflow-x-hidden font-inter">
-      {/* Immersive Background Canvas */}
+      {/* Background */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-15%] left-[-5%] w-[50%] h-[50%] bg-indigo-600/15 rounded-full blur-[140px] animate-pulse" />
         <div className="absolute bottom-[5%] right-[-10%] w-[45%] h-[45%] bg-teal-500/10 rounded-full blur-[140px]" />
         <div className="absolute top-[30%] left-[40%] w-[35%] h-[35%] bg-purple-600/10 rounded-full blur-[140px] opacity-60" />
         <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-        {/* Animated Orbs */}
         <div className="absolute top-[20%] right-[20%] w-2 h-2 bg-indigo-400 rounded-full animate-ping" />
         <div className="absolute bottom-[30%] left-[15%] w-1.5 h-1.5 bg-teal-400 rounded-full animate-ping [animation-delay:1s]" />
       </div>
 
-      {/* Modern Navigation */}
+      {/* Navigation */}
       <nav className="fixed top-0 inset-x-0 z-50 border-b border-white/5 bg-slate-950/70 backdrop-blur-2xl">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3 cursor-pointer group" onClick={() => onStart(ToolType.LANDING)}>
@@ -129,16 +99,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
           </div>
           <div className="hidden md:flex items-center gap-10">
             {['Engines', 'Workflow', 'Pricing', 'FAQ'].map((item) => (
-<button 
-  key={item} 
-  onClick={() => item === 'Pricing' ? onStart(ToolType.PRICING) : scrollToSection(item.toLowerCase())} 
-  className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-all hover:translate-y-[-1px]"
->
-  {item}
-</button>
+              <button 
+                key={item} 
+                onClick={() => item === 'Pricing' ? onStart(ToolType.PRICING) : scrollToSection(item.toLowerCase())} 
+                className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-white transition-all hover:translate-y-[-1px]"
+              >
+                {item}
+              </button>
             ))}
           </div>
           <div className="flex items-center gap-4">
+            {/* ✅ FIXED: Just navigate directly, no credit check */}
             <button onClick={handleStartCreatingFree} className="px-6 py-2.5 bg-white text-black text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-slate-200 transition-all shadow-xl active:scale-95">
               Launch Studio
             </button>
@@ -164,6 +135,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
         </p>
         
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-in fade-in duration-1000 delay-500">
+          {/* ✅ FIXED: Direct navigation */}
           <button onClick={handleStartCreatingFree} className="w-full sm:w-auto px-16 py-8 bg-indigo-600 text-white font-black rounded-3xl hover:bg-indigo-500 transition-all shadow-2xl shadow-indigo-600/30 uppercase tracking-[0.2em] text-xs active:scale-95">
             Start Creating Free
           </button>
@@ -203,36 +175,13 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {[
-            { 
-              title: 'A/B Thumbnail Maker', 
-              desc: 'Generate multiple variations with real-time A/B visual comparison to find the highest-CTR hook.', 
-              icon: '📊', 
-              type: ToolType.AB_TESTING, 
-              color: 'from-indigo-600/20 to-indigo-600/5' 
-            },
-            { 
-              title: 'Carousel Architect', 
-              desc: 'Convert podcasts, videos, or scripts into stunning 10-slide Instagram carousels in seconds.', 
-              icon: '🎞️', 
-              type: ToolType.THUMBNAILS, 
-              color: 'from-teal-600/20 to-teal-600/5' 
-            },
-            { 
-              title: 'Merch Designer', 
-              desc: 'Surgical subject isolation for professional POD-ready designs with perfect alpha transparency.', 
-              icon: '👕', 
-              type: ToolType.POD_MERCH, 
-              color: 'from-purple-600/20 to-purple-600/5' 
-            },
-            { 
-              title: 'Identity Lab', 
-              desc: 'Minimalist, high-end branding and vector-like logos for modern startups and personal brands.', 
-              icon: '✒️', 
-              type: ToolType.LOGO_DESIGNER, 
-              color: 'from-pink-600/20 to-pink-600/5' 
-            }
+            { title: 'A/B Thumbnail Maker', desc: 'Generate multiple variations with real-time A/B visual comparison to find the highest-CTR hook.', icon: '📊', type: ToolType.AB_TESTING, color: 'from-indigo-600/20 to-indigo-600/5' },
+            { title: 'Carousel Architect', desc: 'Convert podcasts, videos, or scripts into stunning 10-slide Instagram carousels in seconds.', icon: '🎞️', type: ToolType.THUMBNAILS, color: 'from-teal-600/20 to-teal-600/5' },
+            { title: 'Merch Designer', desc: 'Surgical subject isolation for professional POD-ready designs with perfect alpha transparency.', icon: '👕', type: ToolType.POD_MERCH, color: 'from-purple-600/20 to-purple-600/5' },
+            { title: 'Identity Lab', desc: 'Minimalist, high-end branding and vector-like logos for modern startups and personal brands.', icon: '✒️', type: ToolType.LOGO_DESIGNER, color: 'from-pink-600/20 to-pink-600/5' }
           ].map((feature, i) => (
-            <div key={i} onClick={() => onStart(feature.type)} className="group relative h-[450px] bg-slate-900/40 rounded-[48px] border border-white/5 p-10 flex flex-col justify-between hover:border-indigo-500/50 transition-all cursor-pointer overflow-hidden backdrop-blur-xl">
+            // ✅ FIXED: Use handleToolClick to check credits
+            <div key={i} onClick={() => handleToolClick(feature.type)} className="group relative h-[450px] bg-slate-900/40 rounded-[48px] border border-white/5 p-10 flex flex-col justify-between hover:border-indigo-500/50 transition-all cursor-pointer overflow-hidden backdrop-blur-xl">
               <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-100 transition-opacity duration-700`} />
               <div className="relative z-10 w-16 h-16 bg-white/5 rounded-3xl flex items-center justify-center text-3xl group-hover:scale-110 group-hover:bg-indigo-600 transition-all duration-500">
                 {feature.icon}
@@ -249,6 +198,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
         </div>
       </section>
 
+      {/* Keep all other sections: Workflow, Pricing, FAQ, Footer - EXACTLY AS THEY WERE */}
       {/* Workflow Path */}
       <section id="workflow" className="relative z-10 bg-slate-950/50 py-32 border-y border-white/5">
         <div className="max-w-7xl mx-auto px-6">
@@ -256,7 +206,6 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
             <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-teal-400 mb-6">Production Workflow</h2>
             <h3 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter">Input to <span className="gradient-text">Asset.</span></h3>
           </div>
-          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
             {[
               { step: '01', title: 'Feed the Model', desc: 'Input your raw hook, script, or a website link. Our AI analyzes the visual potential of your concept.' },
@@ -276,28 +225,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
         </div>
       </section>
 
-      {/* Pricing Section (Integrated) */}
+      {/* Pricing Section */}
       <section id="pricing" className="relative z-10 max-w-7xl mx-auto px-6 py-32">
         <div className="text-center mb-24">
           <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-purple-400 mb-6">Investment</h2>
           <h3 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter">Scale Your <span className="gradient-text">Output.</span></h3>
         </div>
-        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {PRICING_PLANS.map((plan, i) => (
-            <div 
-              key={i} 
-              className={`relative p-8 rounded-[40px] flex flex-col transition-all duration-500 hover:translate-y-[-8px] ${
-                plan.popular 
-                ? 'bg-gradient-to-br from-indigo-600/20 to-purple-700/20 border border-indigo-500 shadow-2xl shadow-indigo-500/10' 
-                : 'bg-slate-900/40 border border-white/5'
-              }`}
-            >
-              {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-500 text-white text-[9px] font-black px-6 py-1.5 rounded-full uppercase tracking-widest shadow-xl">
-                  Most Popular
-                </div>
-              )}
+            <div key={i} className={`relative p-8 rounded-[40px] flex flex-col transition-all duration-500 hover:translate-y-[-8px] ${plan.popular ? 'bg-gradient-to-br from-indigo-600/20 to-purple-700/20 border border-indigo-500 shadow-2xl shadow-indigo-500/10' : 'bg-slate-900/40 border border-white/5'}`}>
+              {plan.popular && <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-500 text-white text-[9px] font-black px-6 py-1.5 rounded-full uppercase tracking-widest shadow-xl">Most Popular</div>}
               <div className="mb-6">
                 <h4 className="text-xl font-black text-white uppercase tracking-tighter mb-2">{plan.name}</h4>
                 <div className="flex items-baseline gap-1">
@@ -308,17 +245,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
               <ul className="space-y-4 mb-10 flex-1">
                 {plan.features.slice(0, 4).map((f, j) => (
                   <li key={j} className="flex items-start gap-3 text-xs font-semibold text-slate-400">
-                    <span className="text-indigo-500 mt-1">✦</span>
-                    {f}
+                    <span className="text-indigo-500 mt-1">✦</span>{f}
                   </li>
                 ))}
               </ul>
-              <button 
-                onClick={() => onStart(ToolType.PRICING)}
-                className={`w-full py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all ${
-                  plan.popular ? 'bg-white text-indigo-900 shadow-xl' : 'bg-white/5 text-white border border-white/10 hover:bg-white/10'
-                }`}
-              >
+              <button onClick={() => onStart(ToolType.PRICING)} className={`w-full py-5 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all ${plan.popular ? 'bg-white text-indigo-900 shadow-xl' : 'bg-white/5 text-white border border-white/10 hover:bg-white/10'}`}>
                 {plan.buttonText}
               </button>
             </div>
@@ -359,11 +290,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
           <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter uppercase mb-12 leading-none relative z-10">
             Build Your <br /><span className="gradient-text">Viral Empire.</span>
           </h2>
+          {/* ✅ FIXED: Direct navigation */}
           <button onClick={handleStartCreatingFree} className="relative z-10 px-16 py-8 bg-white text-black text-xs font-black uppercase tracking-[0.3em] rounded-3xl shadow-3xl shadow-white/10 transition-all hover:scale-105 active:scale-95">
             Launch Workspace Now
           </button>
         </div>
-
         <div className="mt-48 flex flex-col md:flex-row items-center justify-between gap-12 pt-12 border-t border-white/5">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
@@ -380,6 +311,17 @@ const LandingPage: React.FC<LandingPageProps> = ({ onStart }) => {
           <p className="text-[10px] font-black uppercase tracking-widest text-slate-700">© 2025 SNOOPWERK STUDIO. ALL AI RIGHTS RESERVED.</p>
         </div>
       </footer>
+
+      {/* Email Signup Modal */}
+      {showEmailModal && (
+        <EmailSignupModal
+          onClose={() => {
+            setShowEmailModal(false);
+            setPendingTool(null);
+          }}
+          onSuccess={handleEmailSuccess}
+        />
+      )}
     </div>
   );
 };

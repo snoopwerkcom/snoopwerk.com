@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ToolType, AppToolsState, UserCredits } from '../types';
 import ToolABTesting from './ToolABTesting';
 import ToolPOD from './ToolPOD';
 import ToolLogoDesigner from './ToolLogoDesigner';
 import ToolCarousel from './ToolCarousel';
+import EmailSignupModal from './EmailSignupModal'; // ✅ ADD THIS IMPORT
 
 interface DashboardProps {
   activeTool: ToolType;
@@ -14,7 +15,7 @@ interface DashboardProps {
   userEmail?: string;
 }
 
-// ✅ WORK STATE PERSISTENCE (Built-in, no separate file needed!)
+// Work state persistence (keep as-is)
 const WORK_STATE_KEY = 'snoopwerk_work_state';
 
 const saveWorkState = (tool: string, data: any) => {
@@ -55,15 +56,17 @@ const checkIfReturningFromPurchase = () => {
   return urlParams.has('session_id') || urlParams.has('success');
 };
 
-// ✅ MAIN DASHBOARD COMPONENT
 const Dashboard: React.FC<DashboardProps> = ({ activeTool, toolsState, onUpdateState, onNavigate, onExit, userEmail }) => {
+  // ✅ ADD EMAIL MODAL STATE
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [pendingTool, setPendingTool] = useState<ToolType | null>(null);
+  
   const updateCredits = (credits: UserCredits) => onUpdateState('credits', credits);
 
-  // ✅ RESTORE WORK AFTER PURCHASE (IMPROVED)
+  // Restore work after purchase (keep as-is)
   useEffect(() => {
     console.log('🔍 Dashboard mounted, checking for work to restore...');
     
-    // Check if returning from purchase (has URL params) OR if we have saved work
     const hasUrlParams = checkIfReturningFromPurchase();
     const hasSavedWork = localStorage.getItem(WORK_STATE_KEY);
     
@@ -77,51 +80,97 @@ const Dashboard: React.FC<DashboardProps> = ({ activeTool, toolsState, onUpdateS
       
       if (savedState) {
         console.log('📦 Restoring work for tool:', savedState.tool);
-        console.log('📦 Work data:', savedState.data);
         
-        // Small delay to ensure state is ready
         setTimeout(() => {
           switch (savedState.tool) {
             case 'CAROUSEL':
-              console.log('🎨 Restoring CAROUSEL state');
               onUpdateState('carousel', savedState.data);
               onNavigate(ToolType.THUMBNAILS);
               break;
             case 'ABTESTING':
-              console.log('🎨 Restoring ABTESTING state');
               onUpdateState('abTesting', savedState.data);
               onNavigate(ToolType.AB_TESTING);
               break;
             case 'POD':
-              console.log('🎨 Restoring POD state');
               onUpdateState('pod', savedState.data);
               onNavigate(ToolType.POD_MERCH);
               break;
             case 'LOGO':
-              console.log('🎨 Restoring LOGO state');
               onUpdateState('logo', savedState.data);
               onNavigate(ToolType.LOGO_DESIGNER);
               break;
           }
           
-          console.log('✅ Work restored successfully! Cleaning up...');
           localStorage.removeItem(WORK_STATE_KEY);
-          console.log('🗑️ Work state cleaned from localStorage');
         }, 100);
-      } else {
-        console.log('⚠️ No valid saved state found');
       }
       
-      // Clean up URL if it has params
       if (hasUrlParams) {
         window.history.replaceState({}, document.title, window.location.pathname);
       }
-    } else {
-      console.log('ℹ️ No work to restore');
     }
   }, []);
 
-  // ✅ SAVE WORK BEFORE GOING TO PRICING (with delay to ensure save completes)
+  // ✅ NEW: Credit check function for tool navigation
+  const handleToolNavigation = (tool: ToolType) => {
+    console.log('🎯 Tool navigation requested:', tool);
+    
+    // Special case: Pricing always allowed
+    if (tool === ToolType.PRICING) {
+      handleNavigateToPricing();
+      return;
+    }
+    
+    // Get current credits
+    const currentCredits = toolsState.credits.remaining;
+    console.log('   Current credits:', currentCredits);
+    console.log('   User email:', userEmail);
+    
+    // If user HAS credits → Navigate directly
+    if (currentCredits > 0) {
+      console.log('✅ User has credits - navigating');
+      onNavigate(tool);
+      return;
+    }
+    
+    // User has NO credits - check if they already claimed
+    const claimedEmail = localStorage.getItem('user_email');
+    
+    if (claimedEmail || userEmail) {
+      // Already claimed but out of credits → Go to pricing
+      console.log('⚠️ User out of credits - redirecting to pricing');
+      onNavigate(ToolType.PRICING);
+      return;
+    }
+    
+    // New user with 0 credits → Show email popup
+    console.log('📧 New user - showing email popup');
+    setPendingTool(tool);
+    setShowEmailModal(true);
+  };
+
+  // ✅ Handle email success
+  const handleEmailSuccess = (email: string, credits: number) => {
+    console.log('✅ Credits claimed:', email, credits);
+    setShowEmailModal(false);
+    
+    // Update credits in App state
+    updateCredits({
+      ...toolsState.credits,
+      remaining: credits,
+      total: credits
+    });
+    
+    // Navigate to the tool they wanted
+    if (pendingTool) {
+      setTimeout(() => {
+        onNavigate(pendingTool);
+        setPendingTool(null);
+      }, 500);
+    }
+  };
+
+  // Save work before pricing (keep as-is)
   const handleNavigateToPricing = async () => {
     console.log('💾 Saving work before going to pricing...');
     
@@ -140,7 +189,6 @@ const Dashboard: React.FC<DashboardProps> = ({ activeTool, toolsState, onUpdateS
             style: toolsState.carousel.style,
             aspectRatio: toolsState.carousel.aspectRatio,
           });
-          console.log('✅ Carousel state saved');
           stateSaved = true;
         }
         break;
@@ -152,7 +200,6 @@ const Dashboard: React.FC<DashboardProps> = ({ activeTool, toolsState, onUpdateS
             imageUrlA: toolsState.abTesting.imageUrlA,
             imageUrlB: toolsState.abTesting.imageUrlB,
           });
-          console.log('✅ AB Testing state saved');
           stateSaved = true;
         }
         break;
@@ -164,7 +211,6 @@ const Dashboard: React.FC<DashboardProps> = ({ activeTool, toolsState, onUpdateS
             thumbnails: toolsState.pod.thumbnails,
             selectedDesign: toolsState.pod.selectedDesign,
           });
-          console.log('✅ POD state saved');
           stateSaved = true;
         }
         break;
@@ -176,16 +222,13 @@ const Dashboard: React.FC<DashboardProps> = ({ activeTool, toolsState, onUpdateS
             thumbnails: toolsState.logo.thumbnails,
             selectedDesign: toolsState.logo.selectedDesign,
           });
-          console.log('✅ Logo state saved');
           stateSaved = true;
         }
         break;
     }
     
-    // ✅ Small delay to ensure localStorage write completes
     if (stateSaved) {
       await new Promise(resolve => setTimeout(resolve, 100));
-      console.log('💾 State saved to localStorage, navigating to pricing...');
     }
     
     onNavigate(ToolType.PRICING);
@@ -240,13 +283,8 @@ const Dashboard: React.FC<DashboardProps> = ({ activeTool, toolsState, onUpdateS
             {navItems.map((item) => (
               <button
                 key={item.type}
-                onClick={() => {
-                  if (item.type === ToolType.PRICING) {
-                    handleNavigateToPricing();
-                  } else {
-                    onNavigate(item.type);
-                  }
-                }}
+                // ✅ FIXED: Use handleToolNavigation instead of direct onNavigate
+                onClick={() => handleToolNavigation(item.type)}
                 className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-bold transition-all duration-300 relative group ${
                   activeTool === item.type 
                   ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-500/30' 
@@ -261,7 +299,7 @@ const Dashboard: React.FC<DashboardProps> = ({ activeTool, toolsState, onUpdateS
             ))}
           </nav>
 
-        {/* Credit Display */}
+          {/* Credit Display */}
           {credits > 0 && (
             <div className="mt-4 space-y-2">
               {isFreeUser && (
@@ -337,6 +375,17 @@ const Dashboard: React.FC<DashboardProps> = ({ activeTool, toolsState, onUpdateS
       <main className="flex-1 overflow-y-auto custom-scrollbar bg-[#050505] relative">
         <div className="h-full">{renderTool()}</div>
       </main>
+
+      {/* ✅ ADD EMAIL SIGNUP MODAL */}
+      {showEmailModal && (
+        <EmailSignupModal
+          onClose={() => {
+            setShowEmailModal(false);
+            setPendingTool(null);
+          }}
+          onSuccess={handleEmailSuccess}
+        />
+      )}
     </div>
   );
 };

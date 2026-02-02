@@ -95,22 +95,19 @@ const App: React.FC = () => {
           total: credits
         }
       }));
-    } else {
-      // ✅ NEW USER - Give 10 free credits automatically!
-      console.log('🎁 New user detected! Giving 100 free credits');
-      localStorage.setItem('user_credits', '100');
-      setToolsState(prev => ({
-        ...prev,
-        credits: {
-          ...prev.credits,
-          remaining: 100,
-          total: 100
-        }
-      }));
-    }
-  }, []);
+   } else {
+    setToolsState(prev => ({
+      ...prev,
+      credits: {
+        ...prev.credits,
+        remaining: 0,
+        total: 0
+      }
+    }));
+  }
+}, []); // ✅ ADD THIS LINE!
 
-  useEffect(() => {
+useEffect(() => {  // Now the next useEffect can start properly
     const loadUserEmail = () => {
       const email = localStorage.getItem('user_email');
       setUserEmail(email || undefined);
@@ -176,145 +173,134 @@ const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const renderView = () => {
-    if (currentView === ToolType.LANDING) {
-      return <LandingPage onStart={navigateToTool} />;
-    }
-    
-    if (currentView === ToolType.PRICING) {
-      return (
-        <PricingPage 
-          onBack={() => navigateToTool(ToolType.LANDING)} 
-          onSelectPlan={(plan) => {
-            // ✅ IMPORTANT: Clear old customer data before new purchase
-            // This prevents Email B from using Email A's customer ID
-            const storedCustomerId = localStorage.getItem('stripe_customer_id');
-            const storedEmail = localStorage.getItem('user_email');
-            
-            if (storedCustomerId && storedEmail) {
-              console.log('🧹 Clearing old customer data before new purchase');
-              console.log('Previous email:', storedEmail);
-              localStorage.removeItem('stripe_customer_id');
-              // Keep credits for now - will be updated after purchase
-            }
-            
-            if (plan.name === 'FREE') {
-              localStorage.setItem('user_credits', '100');
-              localStorage.removeItem('user_email');
-              console.log('✅ Free tier activated: 100 credits');
-              setToolsState(prev => ({
-                ...prev,
-                credits: {
-                  ...prev.credits,
-                  remaining: 100,
-                  total: 100
-                }
-              }));
-              navigateToTool(ToolType.THUMBNAILS);
-              return;
-            }
-            
-            const existingCredits = localStorage.getItem('user_credits');
-            const currentBalance = existingCredits ? parseInt(existingCredits) : 0;
+  // COMPLETE renderView() FUNCTION - Replace your entire renderView function with this
 
-            const stateToSave = {
-              currentTool: lastActiveTool || ToolType.LANDING,
-              toolsState: toolsState,
-              existingCredits: currentBalance,
-              timestamp: Date.now()
-            };
-
-            console.log('💾 Saving state before payment:', stateToSave);
-            
-            savePaymentState(stateToSave)
-              .then(() => {
-                console.log('✅ State saved to IndexedDB');
-                openStripePaymentLink(plan.name);
-              })
-              .catch((error) => {
-                console.error('❌ Failed to save state:', error);
-                try {
-                  openStripePaymentLink(plan.name);
-                } catch (stripeError) {
-                  console.error('Stripe error:', stripeError);
-                }
-              });
-          }}
-          userEmail={userEmail}
-        />
-      );
-    }
-    
-    if (currentView === ToolType.PAYMENT_SUCCESS) {
-      return (
-        <PaymentSuccess 
-          onComplete={(returnToTool, savedState) => {
-            // ✅ If we have a tool to return to, navigate there (Dashboard will restore state)
-            if (returnToTool) {
-              console.log('🎯 Returning to tool:', returnToTool);
-              
-              const updatedCredits = localStorage.getItem('user_credits');
-              const newCreditBalance = updatedCredits ? parseInt(updatedCredits) : 0;
-              console.log('💰 Credits after payment:', newCreditBalance);
-              
-              setToolsState(prev => ({
-                ...prev,
-                credits: {
-                  ...prev.credits,
-                  remaining: newCreditBalance,
-                  total: newCreditBalance
-                }
-              }));
-              
-              setCurrentView(returnToTool);
-              return;
-            }
-            
-            // ✅ Fallback: Check for savedState (IndexedDB method)
-            if (savedState) {
-              console.log('🔄 Restoring from IndexedDB savedState');
-              
-              const updatedCredits = localStorage.getItem('user_credits');
-              const newCreditBalance = updatedCredits ? parseInt(updatedCredits) : 0;
-              
-              setToolsState({
-                ...savedState,
-                credits: {
-                  ...savedState.credits,
-                  remaining: newCreditBalance,
-                  total: newCreditBalance
-                }
-              });
-              
-              setCurrentView(savedState.currentTool || ToolType.LANDING);
-              return;
-            }
-            
-            // ✅ No restoration info - go to landing
-            console.log('🏠 No restoration info, going to landing');
-            navigateToTool(ToolType.LANDING);
-          }} 
-        />
-      );
-    }
-    
+const renderView = () => {
+  if (currentView === ToolType.LANDING) {
+    return <LandingPage onStart={navigateToTool} />;
+  }
+  
+  if (currentView === ToolType.PRICING) {
     return (
-      <Dashboard 
-        activeTool={currentView} 
-        toolsState={toolsState} 
-        onUpdateState={updateToolState} 
-        onNavigate={navigateToTool} 
-        onExit={() => setCurrentView(ToolType.LANDING)} 
+      <PricingPage 
+        onBack={() => navigateToTool(ToolType.LANDING)} 
+        onSelectPlan={(plan) => {
+          const storedCustomerId = localStorage.getItem('stripe_customer_id');
+          const storedEmail = localStorage.getItem('user_email');
+          
+          if (storedCustomerId && storedEmail) {
+            console.log('🧹 Clearing old customer data before new purchase');
+            console.log('Previous email:', storedEmail);
+            localStorage.removeItem('stripe_customer_id');
+          }
+          
+          if (plan.name === 'FREE') {
+            // ✅ FIXED: Redirect to landing where they must claim via email
+            console.log('📧 FREE plan - redirecting to claim via email');
+            navigateToTool(ToolType.LANDING);
+            return;
+          }
+          
+          const existingCredits = localStorage.getItem('user_credits');
+          const currentBalance = existingCredits ? parseInt(existingCredits) : 0;
+
+          const stateToSave = {
+            currentTool: lastActiveTool || ToolType.LANDING,
+            toolsState: toolsState,
+            existingCredits: currentBalance,
+            timestamp: Date.now()
+          };
+
+          console.log('💾 Saving state before payment:', stateToSave);
+          
+          savePaymentState(stateToSave)
+            .then(() => {
+              console.log('✅ State saved to IndexedDB');
+              openStripePaymentLink(plan.name);
+            })
+            .catch((error) => {
+              console.error('❌ Failed to save state:', error);
+              try {
+                openStripePaymentLink(plan.name);
+              } catch (stripeError) {
+                console.error('Stripe error:', stripeError);
+              }
+            });
+        }}
         userEmail={userEmail}
       />
     );
-  };
-
+  }
+  
+  if (currentView === ToolType.PAYMENT_SUCCESS) {
+    return (
+      <PaymentSuccess 
+        onComplete={(returnToTool, savedState) => {
+          if (returnToTool) {
+            console.log('🎯 Returning to tool:', returnToTool);
+            
+            const updatedCredits = localStorage.getItem('user_credits');
+            const newCreditBalance = updatedCredits ? parseInt(updatedCredits) : 0;
+            console.log('💰 Credits after payment:', newCreditBalance);
+            
+            setToolsState(prev => ({
+              ...prev,
+              credits: {
+                ...prev.credits,
+                remaining: newCreditBalance,
+                total: newCreditBalance
+              }
+            }));
+            
+            setCurrentView(returnToTool);
+            return;
+          }
+          
+          if (savedState) {
+            console.log('🔄 Restoring from IndexedDB savedState');
+            
+            const updatedCredits = localStorage.getItem('user_credits');
+            const newCreditBalance = updatedCredits ? parseInt(updatedCredits) : 0;
+            
+            setToolsState({
+              ...savedState,
+              credits: {
+                ...savedState.credits,
+                remaining: newCreditBalance,
+                total: newCreditBalance
+              }
+            });
+            
+            setCurrentView(savedState.currentTool || ToolType.LANDING);
+            return;
+          }
+          
+          console.log('🏠 No restoration info, going to landing');
+          navigateToTool(ToolType.LANDING);
+        }} 
+      />
+    );
+  }
+  
+  // DEFAULT: Return Dashboard for all other tools
   return (
-    <div className="min-h-screen font-sans antialiased text-slate-200 bg-[#020617]">
-      {renderView()}
-    </div>
+    <Dashboard 
+      activeTool={currentView} 
+      toolsState={toolsState} 
+      onUpdateState={updateToolState} 
+      onNavigate={navigateToTool} 
+      onExit={() => setCurrentView(ToolType.LANDING)} 
+      userEmail={userEmail}
+    />
   );
-};
+}; // ← This closes the renderView FUNCTION
+
+// Main App component return
+return (
+  <div className="min-h-screen font-sans antialiased text-slate-200 bg-[#020617]">
+    {renderView()}
+  </div>
+); // ← This closes the App component's return statement
+}; // ← This closes the App COMPONENT itself
 
 export default App;
