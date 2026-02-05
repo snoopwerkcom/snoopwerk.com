@@ -8,20 +8,22 @@ if (!stripePublishableKey) {
 
 export const stripePromise = loadStripe(stripePublishableKey || '');
 
+const STRIPE_PAYMENT_LINKS: Record<string, string> = {
+  'FREE': '', // No payment needed
+  'BASIC': import.meta.env.VITE_STRIPE_BASIC_LINK || '',
+  'PRO': import.meta.env.VITE_STRIPE_PRO_LINK || '',
+  'AGENCY': import.meta.env.VITE_STRIPE_AGENCY_LINK || '',
+  'QUICK BUY': import.meta.env.VITE_STRIPE_QUICK_BUY_LINK || '', // ✅ NEW
+};
+
 export const openStripePaymentLink = (planName: string) => {
-  const paymentLinks: Record<string, string> = {
-    'BASIC': import.meta.env.VITE_STRIPE_BASIC_LINK || '',
-    'PRO': import.meta.env.VITE_STRIPE_PRO_LINK || '',
-    'AGENCY': import.meta.env.VITE_STRIPE_AGENCY_LINK || '',
-  };
-
-  const link = paymentLinks[planName];
-
+  const link = STRIPE_PAYMENT_LINKS[planName];
+  
   if (!link) {
-    console.error(`❌ No payment link found for ${planName} plan`);
-    alert(`Payment link not configured for ${planName} plan. Please check your .env file.`);
+    console.error(`No payment link found for plan: ${planName}`);
     return;
   }
+  
 
   console.log(`🔗 Opening Stripe payment link for ${planName}: ${link}`);
   window.open(link, '_blank');

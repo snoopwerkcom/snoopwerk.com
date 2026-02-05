@@ -4,7 +4,7 @@ import ToolABTesting from './ToolABTesting';
 import ToolPOD from './ToolPOD';
 import ToolLogoDesigner from './ToolLogoDesigner';
 import ToolCarousel from './ToolCarousel';
-import EmailSignupModal from './EmailSignupModal'; // ✅ ADD THIS IMPORT
+import EmailSignupModal from './EmailSignupModal';
 
 interface DashboardProps {
   activeTool: ToolType;
@@ -15,7 +15,6 @@ interface DashboardProps {
   userEmail?: string;
 }
 
-// Work state persistence (keep as-is)
 const WORK_STATE_KEY = 'snoopwerk_work_state';
 
 const saveWorkState = (tool: string, data: any) => {
@@ -57,13 +56,11 @@ const checkIfReturningFromPurchase = () => {
 };
 
 const Dashboard: React.FC<DashboardProps> = ({ activeTool, toolsState, onUpdateState, onNavigate, onExit, userEmail }) => {
-  // ✅ ADD EMAIL MODAL STATE
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [pendingTool, setPendingTool] = useState<ToolType | null>(null);
   
   const updateCredits = (credits: UserCredits) => onUpdateState('credits', credits);
 
-  // Restore work after purchase (keep as-is)
   useEffect(() => {
     console.log('🔍 Dashboard mounted, checking for work to restore...');
     
@@ -111,57 +108,47 @@ const Dashboard: React.FC<DashboardProps> = ({ activeTool, toolsState, onUpdateS
     }
   }, []);
 
-  // ✅ NEW: Credit check function for tool navigation
   const handleToolNavigation = (tool: ToolType) => {
     console.log('🎯 Tool navigation requested:', tool);
     
-    // Special case: Pricing always allowed
     if (tool === ToolType.PRICING) {
       handleNavigateToPricing();
       return;
     }
     
-    // Get current credits
     const currentCredits = toolsState.credits.remaining;
     console.log('   Current credits:', currentCredits);
     console.log('   User email:', userEmail);
     
-    // If user HAS credits → Navigate directly
     if (currentCredits > 0) {
       console.log('✅ User has credits - navigating');
       onNavigate(tool);
       return;
     }
     
-    // User has NO credits - check if they already claimed
     const claimedEmail = localStorage.getItem('user_email');
     
     if (claimedEmail || userEmail) {
-      // Already claimed but out of credits → Go to pricing
       console.log('⚠️ User out of credits - redirecting to pricing');
       onNavigate(ToolType.PRICING);
       return;
     }
     
-    // New user with 0 credits → Show email popup
     console.log('📧 New user - showing email popup');
     setPendingTool(tool);
     setShowEmailModal(true);
   };
 
-  // ✅ Handle email success
   const handleEmailSuccess = (email: string, credits: number) => {
     console.log('✅ Credits claimed:', email, credits);
     setShowEmailModal(false);
     
-    // Update credits in App state
     updateCredits({
       ...toolsState.credits,
       remaining: credits,
       total: credits
     });
     
-    // Navigate to the tool they wanted
     if (pendingTool) {
       setTimeout(() => {
         onNavigate(pendingTool);
@@ -170,7 +157,6 @@ const Dashboard: React.FC<DashboardProps> = ({ activeTool, toolsState, onUpdateS
     }
   };
 
-  // Save work before pricing (keep as-is)
   const handleNavigateToPricing = async () => {
     console.log('💾 Saving work before going to pricing...');
     
@@ -283,7 +269,6 @@ const Dashboard: React.FC<DashboardProps> = ({ activeTool, toolsState, onUpdateS
             {navItems.map((item) => (
               <button
                 key={item.type}
-                // ✅ FIXED: Use handleToolNavigation instead of direct onNavigate
                 onClick={() => handleToolNavigation(item.type)}
                 className={`w-full flex items-center gap-4 px-5 py-4 rounded-2xl font-bold transition-all duration-300 relative group ${
                   activeTool === item.type 
@@ -299,13 +284,13 @@ const Dashboard: React.FC<DashboardProps> = ({ activeTool, toolsState, onUpdateS
             ))}
           </nav>
 
-          {/* Credit Display */}
+          {/* Credit Display with $10 Quick Buy */}
           {credits > 0 && (
             <div className="mt-4 space-y-2">
               {isFreeUser && (
                 <div className={`w-full px-5 py-4 rounded-2xl border transition-all ${
                   isLowCredit 
-                    ? 'bg-gradient-to-r from-orange-500/20 to-red-500/20 border-orange-500/50 animate-pulse shadow-lg shadow-orange-500/30' 
+                    ? 'bg-gradient-to-r from-orange-500/20 to-red-500/20 border-orange-500/50 shadow-lg shadow-orange-500/30' 
                     : 'bg-white/5 border-white/10'
                 }`}>
                   <div className="flex items-center gap-4">
@@ -317,9 +302,23 @@ const Dashboard: React.FC<DashboardProps> = ({ activeTool, toolsState, onUpdateS
                     </div>
                   </div>
                   {isLowCredit && (
-                    <p className="mt-2 text-xs text-orange-300/90 leading-relaxed">
-                      ⚠️ Low credits! You have less than 3 images remaining. Visit the Pricing page to purchase more credits.
-                    </p>
+                    <>
+                      <p className="mt-2 text-xs text-orange-300/90 leading-relaxed">
+                        ⚠️ Low credits! Less than 3 images left.
+                      </p>
+                      <button
+                        onClick={() => handleToolNavigation(ToolType.PRICING)}
+                        className="mt-3 w-full px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white text-xs font-black rounded-xl uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-green-600/30"
+                      >
+                        <div className="flex items-center justify-center gap-2">
+                          <span>⚡</span>
+                          <span>$10 Quick Buy</span>
+                        </div>
+                        <div className="text-[9px] font-bold mt-0.5 opacity-90">
+                          340 Credits • ~17 Images
+                        </div>
+                      </button>
+                    </>
                   )}
                 </div>
               )}
@@ -338,7 +337,7 @@ const Dashboard: React.FC<DashboardProps> = ({ activeTool, toolsState, onUpdateS
               {!isFreeUser && (
                 <div className={`w-full px-5 py-4 rounded-2xl border transition-all ${
                   isLowCredit 
-                    ? 'bg-gradient-to-r from-orange-500/20 to-red-500/20 border-orange-500/50 animate-pulse shadow-lg shadow-orange-500/30' 
+                    ? 'bg-gradient-to-r from-orange-500/20 to-red-500/20 border-orange-500/50 shadow-lg shadow-orange-500/30' 
                     : 'bg-white/5 border-white/10'
                 }`}>
                   <div className="flex items-center gap-4">
@@ -350,9 +349,23 @@ const Dashboard: React.FC<DashboardProps> = ({ activeTool, toolsState, onUpdateS
                     </div>
                   </div>
                   {isLowCredit && (
-                    <p className="mt-2 text-xs text-orange-300/90 leading-relaxed">
-                      ⚠️ Low credits! You have less than 3 images remaining. Visit the Pricing page to purchase more credits.
-                    </p>
+                    <>
+                      <p className="mt-2 text-xs text-orange-300/90 leading-relaxed">
+                        ⚠️ Low credits! Less than 3 images left.
+                      </p>
+                      <button
+                        onClick={() => handleToolNavigation(ToolType.PRICING)}
+                        className="mt-3 w-full px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white text-xs font-black rounded-xl uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-green-600/30"
+                      >
+                        <div className="flex items-center justify-center gap-2">
+                          <span>⚡</span>
+                          <span>$10 Quick Buy</span>
+                        </div>
+                        <div className="text-[9px] font-bold mt-0.5 opacity-90">
+                          340 Credits • ~17 Images
+                        </div>
+                      </button>
+                    </>
                   )}
                 </div>
               )}
@@ -376,7 +389,6 @@ const Dashboard: React.FC<DashboardProps> = ({ activeTool, toolsState, onUpdateS
         <div className="h-full">{renderTool()}</div>
       </main>
 
-      {/* ✅ ADD EMAIL SIGNUP MODAL */}
       {showEmailModal && (
         <EmailSignupModal
           onClose={() => {

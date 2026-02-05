@@ -1,4 +1,3 @@
-
 export enum ToolType {
   LANDING = 'LANDING',
   AB_TESTING = 'AB_TESTING',
@@ -189,27 +188,27 @@ export const PRICING_PLANS: PricingPlan[] = [
   {
     name: "FREE",
     price: "$0",
-    credits: "100",                    // Changed from "10"
+    credits: "100",
     description: "Trial",
-    features: ["100 CREDITS", "Image Generation", "Magic Edit", "No watermark"],  // Changed from "10 credits"
+    features: ["100 CREDITS", "Image Generation", "Magic Edit", "No watermark"],
     buttonText: "Get Started",
     paymentLink: "",
   },
   {
     name: "BASIC",
     price: "$22",
-    credits: "600",                    // Changed from "60"
+    credits: "600",
     description: "Growth",
-    features: ["600 CREDITS", "Generate AI Images", "Remove Backgrounds", "4K Image Upscale", "Magic Edit Access"],  // Changed from "60 CREDITS"
+    features: ["600 CREDITS", "Generate AI Images", "Remove Backgrounds", "4K Image Upscale", "Magic Edit Access"],
     buttonText: "Choose Basic",
     paymentLink: import.meta.env.VITE_STRIPE_BASIC_LINK,
   },
   {
     name: "PRO",
     price: "$49",
-    credits: "1800",                   // Changed from "180"
+    credits: "1800",
     description: "Power",
-    features: ["1800 CREDITS", "Everything in BASIC", "Faster Rendering", "Batch Processing", "Priority Synthesis"],  // Changed from "180 CREDITS"
+    features: ["1800 CREDITS", "Everything in BASIC", "Faster Rendering", "Batch Processing", "Priority Synthesis"],
     buttonText: "Choose Pro",
     popular: true,
     paymentLink: import.meta.env.VITE_STRIPE_PRO_LINK,
@@ -217,10 +216,29 @@ export const PRICING_PLANS: PricingPlan[] = [
   {
     name: "AGENCY",
     price: "$99",
-    credits: "5000",                   // Changed from "500"
+    credits: "5000",
     description: "Scale",
-    features: ["5000 CREDITS", "Everything in PRO", "Team Access", "Unlimited Cloud History", "White-label Exports"],  // Changed from "500 CREDITS"
+    features: ["5000 CREDITS", "Everything in PRO", "Team Access", "Unlimited Cloud History", "White-label Exports"],
     buttonText: "Choose Agency",
     paymentLink: import.meta.env.VITE_STRIPE_AGENCY_LINK,
   }
 ];
+
+// ✅ NEW: Quick Buy Plan (One-time purchase with first-time bonus)
+export const QUICK_BUY_PLAN: PricingPlan = {
+  name: "QUICK BUY",
+  price: "$10",
+  credits: "340", // 240 base + 100 first-time bonus
+  description: "Instant Top-Up",
+  features: [
+    "340 CREDITS (240 + 100 Bonus)",
+    "~17 AI Images",
+    "34 Remove BG or Upscale",
+    "First Purchase Bonus",
+    "No Subscription",
+    "Instant Top-Up"
+  ],
+  buttonText: "Buy Now",
+  popular: false,
+  paymentLink: import.meta.env.VITE_STRIPE_QUICK_BUY_LINK,
+};

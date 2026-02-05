@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { PRICING_PLANS, PricingPlan } from '../types';
+import { PRICING_PLANS, QUICK_BUY_PLAN, PricingPlan } from '../types';
 
 interface PricingPageProps {
   onBack: () => void;
@@ -34,8 +33,8 @@ const PricingPage: React.FC<PricingPageProps> = ({ onBack, onSelectPlan }) => {
           </p>
         </div>
 
-        {/* Pricing Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16 items-stretch">
+        {/* Main Pricing Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 items-stretch">
           {PRICING_PLANS.map((plan, i) => {
             const isFree = plan.name === "FREE";
             
@@ -89,6 +88,84 @@ const PricingPage: React.FC<PricingPageProps> = ({ onBack, onSelectPlan }) => {
           })}
         </div>
 
+        {/* Quick Buy Section - Attractive Horizontal Card */}
+        <div className="mb-12">
+          <div className="max-w-5xl mx-auto">
+            <div className="relative bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 px-10 py-7 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 transition-all duration-300 shadow-lg border-2 border-green-500/30 hover:shadow-xl hover:border-green-500/50 hover:scale-[1.02]">
+              
+              {/* First-Time Bonus Badge */}
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 md:left-8 md:translate-x-0 bg-gradient-to-r from-green-600 to-emerald-600 text-white text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg flex items-center gap-1.5">
+                <span>🎁</span>
+                <span>First Purchase Bonus</span>
+              </div>
+
+              {/* Left Side: Icon + Main Info */}
+              <div className="flex items-center gap-6 flex-1">
+                <div className="w-16 h-16 bg-gradient-to-br from-green-600 to-emerald-600 rounded-2xl flex items-center justify-center shrink-0 shadow-xl">
+                  <span className="text-4xl">⚡</span>
+                </div>
+                
+                <div>
+                  <div className="flex items-baseline gap-3 mb-2">
+                    <h3 className="text-4xl font-black text-slate-900 tracking-tight">$10</h3>
+                    <span className="text-xs font-black text-green-600 uppercase tracking-wider bg-green-100 px-3 py-1 rounded-full">Quick Buy</span>
+                  </div>
+                  
+                  {/* Credits + Images Display */}
+                  <div className="flex items-center gap-4 mb-2">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-2xl font-black text-slate-900">340</span>
+                      <span className="text-xs font-bold text-slate-500 uppercase">Credits</span>
+                    </div>
+                    <span className="text-slate-300">•</span>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-2xl font-black text-green-600">~17</span>
+                      <span className="text-xs font-bold text-slate-500 uppercase">Images</span>
+                    </div>
+                  </div>
+                  
+                  {/* Feature Breakdown */}
+                  <div className="flex flex-wrap items-center gap-3 text-[11px] font-bold text-slate-600">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm">🎨</span>
+                      <span>12 Generate</span>
+                    </div>
+                    <span className="text-slate-300">|</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm">✂️</span>
+                      <span>34 Remove BG</span>
+                    </div>
+                    <span className="text-slate-300">|</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm">💎</span>
+                      <span>34 Upscale</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Side: Bonus Details + Button */}
+              <div className="flex flex-col items-end gap-3">
+                <div className="text-right mb-1">
+                  <div className="text-[11px] font-black text-green-700 uppercase tracking-wider mb-0.5">
+                    240 Credits + 100 Bonus
+                  </div>
+                  <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">
+                    No Subscription • Instant Top-Up
+                  </div>
+                </div>
+                
+                <button 
+                  onClick={() => onSelectPlan(QUICK_BUY_PLAN)}
+                  className="px-10 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-black rounded-xl text-sm uppercase tracking-widest transition-all hover:from-green-700 hover:to-emerald-700 active:scale-95 shadow-lg shadow-green-600/40 hover:shadow-xl hover:shadow-green-600/50"
+                >
+                  Buy Now
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Usage Note Section */}
         <div className="max-w-3xl mx-auto bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
           <div className="flex flex-col md:flex-row items-center gap-6">
@@ -98,8 +175,8 @@ const PricingPage: React.FC<PricingPageProps> = ({ onBack, onSelectPlan }) => {
             <div>
               <h4 className="text-sm font-black text-slate-900 uppercase tracking-widest mb-1">Usage Note</h4>
               <p className="text-slate-500 text-sm font-medium leading-relaxed">
-  Credits are charged per image action: Image generation (20 credits), Remove background (10 credits), Upscale (10 credits), Magic edit (20 credits).
-</p>
+                Credits are charged per image action: Image generation (20 credits), Remove background (10 credits), Upscale (10 credits), Magic edit (20 credits).
+              </p>
             </div>
           </div>
         </div>
