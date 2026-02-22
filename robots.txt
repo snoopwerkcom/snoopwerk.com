@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Disallow: /api/
+Disallow: /backend/
+
+Sitemap: https://snoopwerk.com/sitemap.xml
